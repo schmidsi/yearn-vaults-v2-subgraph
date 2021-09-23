@@ -61,7 +61,7 @@ export function createAndGet(
     strategy.save();
     StrategyTemplate.create(strategyAddress);
   }
-  return strategy!;
+  return strategy;
 }
 
 export function createReport(
@@ -83,10 +83,8 @@ export function createReport(
   if (strategy !== null) {
     log.info(
       '[Strategy] Getting latest report {} for strategy {}. TxHash: {}',
-      [strategy.latestReport, strategy.id, txHash]
+      [strategy.latestReport!, strategy.id, txHash]
     );
-    // Getting latest report to compare to the new one and create a new report result.
-    let latestReport = StrategyReport.load(strategy.latestReport);
     let strategyReport = strategyReportLibrary.getOrCreate(
       transaction.id,
       strategy as Strategy,
@@ -102,6 +100,12 @@ export function createReport(
     );
     strategy.latestReport = strategyReport.id;
     strategy.save();
+
+    // Getting latest report to compare to the new one and create a new report result.
+    let latestReport: StrategyReport | null;
+    if (strategy.latestReport !== null) {
+      latestReport = StrategyReport.load(strategy.latestReport!);
+    }
 
     if (latestReport !== null) {
       log.info(
@@ -163,7 +167,7 @@ export function harvest(
     );
   }
 
-  return harvest!;
+  return harvest;
 }
 
 export function strategyCloned(
