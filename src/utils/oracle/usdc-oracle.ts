@@ -19,7 +19,7 @@ function getSushiSwapCalculationsAddress(network: string): Address {
   let map = new Map<string, string>();
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS);
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS);
-  let address = Address.fromHexString(map.get(network)) as Address;
+  let address = changetype<Address>(Address.fromHexString(map.get(network)));
   log.info('Getting SushiSwap Calculations address {} in {}.', [
     address.toHexString(),
     network,
@@ -31,7 +31,7 @@ function getOracleCalculatorAddress(network: string): Address {
   let map = new Map<string, string>();
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_USDC_ORACLE_ADDRESS);
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_USDC_ORACLE_ADDRESS);
-  let address = Address.fromHexString(map.get(network)) as Address;
+  let address = changetype<Address>(Address.fromHexString(map.get(network)));
   log.info('Getting Oracle Calculations address {} in {}.', [
     address.toHexString(),
     network,
@@ -44,7 +44,7 @@ function getCurveCalculationsAddress(network: string): Address {
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_CALCULATIONS_CURVE_ADDRESS);
   // Note: Curve is not present in Fantom, so we use Spooky Swap.
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_CALCULATIONS_SPOOKY_SWAP_ADDRESS);
-  let address = Address.fromHexString(map.get(network)) as Address;
+  let address = changetype<Address>(Address.fromHexString(map.get(network)));
   log.info('Getting Curve Calculations address {} in {}.', [
     address.toHexString(),
     network,

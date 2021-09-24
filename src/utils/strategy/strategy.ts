@@ -81,9 +81,10 @@ export function createReport(
   log.info('[Strategy] Create report for strategy {}', [strategyId]);
   let strategy = Strategy.load(strategyId);
   if (strategy !== null) {
+    let latestReportId = strategy.latestReport;
     log.info(
       '[Strategy] Getting latest report {} for strategy {}. TxHash: {}',
-      [strategy.latestReport!, strategy.id, txHash]
+      [latestReportId ? latestReportId : 'null', strategy.id, txHash]
     );
     let strategyReport = strategyReportLibrary.getOrCreate(
       transaction.id,
@@ -102,23 +103,22 @@ export function createReport(
     strategy.save();
 
     // Getting latest report to compare to the new one and create a new report result.
-    let latestReport: StrategyReport | null;
     if (strategy.latestReport !== null) {
-      latestReport = StrategyReport.load(strategy.latestReport!);
-    }
+      let latestReport = StrategyReport.load(strategy.latestReport!);
 
-    if (latestReport !== null) {
-      log.info(
-        '[Strategy] Create report result (latest {} vs current {}) for strategy {}. TxHash: {}',
-        [latestReport.id, strategyReport.id, strategyId, txHash]
-      );
-      strategyReportResultLibrary.create(
-        transaction,
-        latestReport as StrategyReport,
-        strategyReport
-      );
+      if (latestReport !== null) {
+        log.info(
+          '[Strategy] Create report result (latest {} vs current {}) for strategy {}. TxHash: {}',
+          [latestReport.id, strategyReport.id, strategyId, txHash]
+        );
+        strategyReportResultLibrary.create(
+          transaction,
+          latestReport as StrategyReport,
+          strategyReport
+        );
+      }
+      return strategyReport;
     }
-    return strategyReport;
   }
   return null;
 }
