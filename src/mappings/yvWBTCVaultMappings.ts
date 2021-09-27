@@ -45,7 +45,7 @@ function createYvWBTCVaultIfNeeded(
   return vaultLibrary.createCustomVaultIfNeeded(
     vaultAddress,
     // Note: This custom mapping is not used in Fantom. So, we can hardcoded the address.
-    Address.fromHexString(ETH_MAINNET_REGISTRY_ADDRESS_V2) as Address,
+    changetype<Address>(Address.fromHexString(ETH_MAINNET_REGISTRY_ADDRESS_V2)),
     ENDORSED,
     API_VERSION_0_3_5,
     transaction,

@@ -156,16 +156,18 @@ export function release(
   return entity;
 }
 
-export function tag(vault: Address, tag: string): Vault {
+export function tag(vault: Address, tag: string): Vault | null {
   let id = vault.toHexString();
   log.info('Processing tag for vault address: {}', [id]);
   let entity = Vault.load(id);
   if (entity == null) {
+    log.warning("Vault DOESN'T exist for tagging: {}", [id]);
+    return null;
   } else {
     entity.tags = tag.split(',');
     entity.save();
+    return entity;
   }
-  return entity as Vault;
 }
 
 export function deposit(
