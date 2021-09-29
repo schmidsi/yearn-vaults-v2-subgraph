@@ -81,12 +81,12 @@ export function createReport(
   log.info('[Strategy] Create report for strategy {}', [strategyId]);
   let strategy = Strategy.load(strategyId);
   if (strategy !== null) {
-    let latestReportId = strategy.latestReport;
+    let currentReportId = strategy.latestReport;
     log.info(
-      '[Strategy] Getting latest report {} for strategy {}. TxHash: {}',
-      [latestReportId ? latestReportId : 'null', strategy.id, txHash]
+      '[Strategy] Getting current report {} for strategy {}. TxHash: {}',
+      [currentReportId ? currentReportId : 'null', strategy.id, txHash]
     );
-    let strategyReport = strategyReportLibrary.getOrCreate(
+    let latestReport = strategyReportLibrary.getOrCreate(
       transaction.id,
       strategy as Strategy,
       gain,
@@ -99,25 +99,29 @@ export function createReport(
       debtPaid,
       event
     );
-    strategy.latestReport = strategyReport.id;
+    strategy.latestReport = latestReport.id;
     strategy.save();
 
     // Getting latest report to compare to the new one and create a new report result.
-    if (strategy.latestReport !== null) {
-      let latestReport = StrategyReport.load(strategy.latestReport!);
-
-      if (latestReport !== null) {
+    if (currentReportId !== null) {
+      let currentReport = StrategyReport.load(currentReportId);
+      if (currentReport !== null) {
         log.info(
           '[Strategy] Create report result (latest {} vs current {}) for strategy {}. TxHash: {}',
-          [latestReport.id, strategyReport.id, strategyId, txHash]
+          [latestReport.id, currentReport.id, strategyId, txHash]
         );
         strategyReportResultLibrary.create(
           transaction,
-          latestReport as StrategyReport,
-          strategyReport
+          currentReport as StrategyReport,
+          latestReport
         );
       }
-      return strategyReport;
+      return latestReport;
+    } else {
+      log.info(
+        '[Strategy] Report result NOT created. Only one report created {} for strategy {}. TxHash: {}',
+        [latestReport.id, strategyId, txHash]
+      );
     }
   }
   return null;

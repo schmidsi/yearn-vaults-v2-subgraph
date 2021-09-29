@@ -20,7 +20,7 @@ export function getOrCreate(
 
   let strategyReportId = buildIdFromEvent(event);
   let strategyReport = StrategyReport.load(strategyReportId);
-  if (strategyReport == null) {
+  if (strategyReport === null) {
     strategyReport = new StrategyReport(strategyReportId);
     strategyReport.strategy = strategy.id;
     strategyReport.blockNumber = event.block.number;
