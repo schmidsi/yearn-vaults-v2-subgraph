@@ -187,7 +187,8 @@ export function handleStrategyMigrated(event: StrategyMigrated): void {
     'StrategyMigratedEvent'
   );
 
-  let oldStrategy = Strategy.load(event.params.oldVersion.toHexString());
+  let oldStrategyAddress = event.params.oldVersion;
+  let oldStrategy = Strategy.load(oldStrategyAddress.toHexString());
 
   if (oldStrategy !== null) {
     let newStrategyAddress = event.params.newVersion;
@@ -209,6 +210,11 @@ export function handleStrategyMigrated(event: StrategyMigrated): void {
         oldStrategy.performanceFeeBps,
         null,
         ethTransaction
+      );
+      vaultLibrary.strategyRemovedFromQueue(
+        oldStrategyAddress,
+        ethTransaction,
+        event
       );
     }
   }

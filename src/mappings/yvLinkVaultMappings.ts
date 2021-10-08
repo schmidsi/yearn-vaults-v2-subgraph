@@ -29,7 +29,7 @@ import {
   YV_LINK_VAULT_END_BLOCK_CUSTOM,
   DON_T_CREATE_VAULT_TEMPLATE,
   ETH_MAINNET_REGISTRY_ADDRESS_V2,
-  ENDORSED,
+  EXPERIMENTAL,
   API_VERSION_0_4_2,
 } from '../utils/constants';
 import * as strategyLibrary from '../utils/strategy/strategy';
@@ -46,7 +46,7 @@ function createYvLinkVaultIfNeeded(
     vaultAddress,
     // Note: This custom mapping is not used in Fantom. So, we can hardcoded the address.
     changetype<Address>(Address.fromHexString(ETH_MAINNET_REGISTRY_ADDRESS_V2)),
-    ENDORSED,
+    EXPERIMENTAL,
     API_VERSION_0_4_2,
     transaction,
     DON_T_CREATE_VAULT_TEMPLATE
@@ -252,7 +252,8 @@ export function handleStrategyMigrated(event: StrategyMigrated): void {
       'yvLinkVault_StrategyMigratedEvent'
     );
 
-    let oldStrategy = Strategy.load(event.params.oldVersion.toHexString());
+    let oldStrategyAddress = event.params.oldVersion;
+    let oldStrategy = Strategy.load(oldStrategyAddress.toHexString());
 
     if (oldStrategy !== null) {
       let newStrategyAddress = event.params.newVersion;
@@ -274,6 +275,11 @@ export function handleStrategyMigrated(event: StrategyMigrated): void {
           oldStrategy.performanceFeeBps,
           null,
           ethTransaction
+        );
+        vaultLibrary.strategyRemovedFromQueue(
+          oldStrategyAddress,
+          ethTransaction,
+          event
         );
       }
     }
