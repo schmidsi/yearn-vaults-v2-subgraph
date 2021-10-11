@@ -33,16 +33,34 @@ export let CURVE_SETH_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(11881933);
 export let YV_WBTC_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(12341475);
 export let YV_LINK_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(12586056);
 
+/*
+  The 4 vaults were added to Registry at https://ftmscan.com/tx/0xe270df804fe8262f42827ed479f845553ef019501ddfea0d94f49c4d6750d115
+  block #18456258
+    Vaults:
+        WFTM https://ftmscan.com/address/0x0dec85e74a92c52b7f708c4b10207d9560cefaf0
+        MIM https://ftmscan.com/address/0x0a0b23d9786963de69cb2447dc125c49929419d8
+        USDC https://ftmscan.com/address/0xef0210eb96c7eb36af8ed1c20306462764935607
+        DAI https://ftmscan.com/address/0x637ec617c86d24e421328e6caea1d92114892439
+*/
+export let FTM_YV_FTM_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+export let FTM_YV_MIM_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+export let FTM_YV_USDC_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+export let FTM_YV_DAI_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+//TODO Update blocks and add comment
+export let FTM_YV_YFI_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+export let FTM_YV_2CRV_VAULT_END_BLOCK_CUSTOM = BigInt.fromI32(18456258);
+
 export const DON_T_CREATE_VAULT_TEMPLATE = false;
 export const DO_CREATE_VAULT_TEMPLATE = true;
 
 export let FTM_MAINNET_REGISTRY_ADDRESS =
-  '0x41679043846d1B16b44FBf6E7FE531390e5bf092';
+  '0x727fe1759430df13655ddb0731dE0D0FDE929b04';
 export let ETH_MAINNET_REGISTRY_ADDRESS_V1 =
   '0xe15461b18ee31b7379019dc523231c57d1cbc18c';
 export let ETH_MAINNET_REGISTRY_ADDRESS_V2 =
   '0x50c1a2eA0a861A967D9d0FFE2AE4012c2E053804';
 export const ENDORSED = 'Endorsed';
+export const EXPERIMENTAL = 'Experimental';
 export const API_VERSION_0_4_2 = '0.4.2';
 export const API_VERSION_0_3_5 = '0.3.5';
 export const ETH_MAINNET_NETWORK = 'mainnet';

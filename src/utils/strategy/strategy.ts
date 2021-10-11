@@ -7,7 +7,6 @@ import {
 } from '../../../generated/schema';
 import { Strategy as StrategyTemplate } from '../../../generated/templates';
 import { Strategy as StrategyContract } from '../../../generated/templates/Vault/Strategy';
-
 import { booleanToString, getTimeInMillis } from '../commons';
 import { BIGINT_ZERO } from '../constants';
 import * as strategyReportLibrary from './strategy-report';
@@ -29,11 +28,20 @@ export function createAndGet(
   clonedFrom: Strategy | null,
   transaction: Transaction
 ): Strategy {
-  log.debug('[Strategy] Create', []);
+  log.info('[Strategy] CreateAndGet strategy {} in vault {} in TxHash {}', [
+    strategyAddress.toHexString(),
+    vault.toHexString(),
+    transaction.hash.toHexString(),
+  ]);
+  let strategyContract = StrategyContract.bind(strategyAddress);
   let strategyId = buildId(strategyAddress);
   let strategy = Strategy.load(strategyId);
   if (strategy == null) {
-    let strategyContract = StrategyContract.bind(strategyAddress);
+    log.info('[Strategy] Create new strategy {} in vault {} in TxHash {}', [
+      strategyAddress.toHexString(),
+      vault.toHexString(),
+      transaction.hash.toHexString(),
+    ]);
     strategy = new Strategy(strategyId);
     strategy.inQueue = true;
     strategy.blockNumber = transaction.blockNumber;
