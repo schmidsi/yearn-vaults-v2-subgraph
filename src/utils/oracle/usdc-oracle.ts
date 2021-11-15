@@ -1,5 +1,5 @@
 import { Address, BigInt, log, dataSource } from '@graphprotocol/graph-ts';
-import { Oracle as OracleContract } from '../../../generated/registry/Oracle';
+import { Oracle as OracleContract } from '../../../generated/Registry/Oracle';
 import { Token } from '../../../generated/schema';
 import { CalculationsCurve as CalculationsCurveContract } from '../../../generated/templates/Vault/CalculationsCurve';
 import { CalculationsSushiSwap as CalculationsSushiSwapContract } from '../../../generated/templates/Vault/CalculationsSushiSwap';
