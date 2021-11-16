@@ -14,13 +14,13 @@ The first step is to fork the repository `https://github.com/yearn/yearn-vaults-
 
 Then, clone it:
 
-```git clone your-repo-url```
+`git clone your-repo-url`
 
 Finally, once you have cloned the repo, install the dependencies:
 
-```yarn install```
+`yarn install`
 
-> Unfortunately, we still didn't implement tests in the repo for our handlers. If you are available to help us,  feel free to create a PR with the first tests. See more info how to start contributing [here](#Do-you-want-to-contribute)
+> Unfortunately, we still didn't implement tests in the repo for our handlers. If you are available to help us, feel free to create a PR with the first tests. See more info how to start contributing [here](#Do-you-want-to-contribute)
 
 ## Important Concepts
 
@@ -34,7 +34,7 @@ We may use specific prefixes to indicate a particular type of value.
 
 Use plurals when referring to Tokens or Shares (e.g., totalShares, balanceTokens).
 
-### The ***Update*** Entities
+### The **_Update_** Entities
 
 When you see an entity with the `Update` prefix, it means it stores historical data.
 
@@ -48,7 +48,7 @@ In this case, we only create the new `VaultUpdate` item, setting the `VaultUpdat
 
 The Vaults V2 (and some strategies) use the minimal proxy pattern.
 
-The Graph has an issue with this pattern that invokes the call handler twice. To avoid this issue,  we have a validation not to process the duplicated calls.
+The Graph has an issue with this pattern that invokes the call handler twice. To avoid this issue, we have a validation not to process the duplicated calls.
 
 if you see an `if` statement like this is due to this issue:
 

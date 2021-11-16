@@ -36,14 +36,13 @@ We currently have a multitude of needs across all of our yTeams. As the Yearn ec
 
 If you are interested in working as a yearn contributor, complete [this form](https://github.com/yearn/onboarding/invitations), and a member of our operations team will reach out within 1-2 days with the next steps.
 
-For additional information on the onboarding process, [click here](<https://yearnfinance.notion.site/Contributors-bceb03566612483ca139f800fb5452ad>)
-
+For additional information on the onboarding process, [click here](https://yearnfinance.notion.site/Contributors-bceb03566612483ca139f800fb5452ad)
 
 ## Want to Help Us In The Subgraph?
 
 Feel free to assign an [issue](https://github.com/yearn/yearn-vaults-v2-subgraph/issues) from our current list and create a pull request. We will review it in the next 1-2 days to give you feedback about your changes.
 
-If you want to help Yearn Finance but you need more information about this repository, schema and entities, you can read this [onboarding doc](../docs/onboarding.md).
+If you want to help Yearn Finance but you need more information about this repository, schema and entities, you can read this [onboarding doc](./docs/onboarding.md).
 
 ## Subgraphs
 
