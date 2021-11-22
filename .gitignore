@@ -108,3 +108,4 @@ subgraph.yaml
 package-lock.json
 .idea
 analysis
+*.wasm

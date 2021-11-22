@@ -35,7 +35,6 @@ const createNewVaultFromAddress = (
   let id = vaultAddress.toHexString();
   let vaultEntity = new Vault(id);
   let vaultContract = VaultContract.bind(vaultAddress);
-
   let token = getOrCreateToken(vaultContract.token());
   let shareToken = getOrCreateToken(vaultAddress);
 

@@ -16,6 +16,7 @@ build
 schema.graphql
 subgraph.template.yaml
 subgraph.yaml
+*.wasm
 
 # JS
 node_modules

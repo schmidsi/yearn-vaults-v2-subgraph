@@ -190,6 +190,13 @@
     which "2.0.2"
     yaml "^1.5.1"
 
+"@graphprotocol/graph-ts@0.22.0":
+  version "0.22.0"
+  resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.22.0.tgz#5280513d1c8a162077f82ce7f9a492bb5783d6f4"
+  integrity sha512-kJIBL73xBxj0+NJdRABukAtcrc3Mb8jt31s0tCLPe6c57rQXEf7KR9oYrFdzE1ZsJCP6j+MX+A2+sj1Pj3aJtQ==
+  dependencies:
+    assemblyscript "0.19.10"
+
 "@graphprotocol/graph-ts@0.22.1":
   version "0.22.1"
   resolved "https://registry.yarnpkg.com/@graphprotocol/graph-ts/-/graph-ts-0.22.1.tgz#3189b2495b33497280f617316cce68074d48e236"
@@ -439,6 +446,15 @@ assemblyscript@0.19.10:
     binaryen "101.0.0-nightly.20210723"
     long "^4.0.0"
 
+assemblyscript@^0.19.16:
+  version "0.19.20"
+  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.19.20.tgz#b8d63b8319eac8a13ec34c0737c2de1bea5d5b7d"
+  integrity sha512-uull/pqWqKZkBC8pQM+oujNoRKC4bN+gv/cJ2Dl71fOzvCXqQN+q/36RpMzN4v5nryt8XoKwXQ8dbv4zGU1nbQ==
+  dependencies:
+    binaryen "102.0.0-nightly.20211028"
+    long "^5.1.0"
+    source-map-support "^0.5.20"
+
 assert-plus@1.0.0, assert-plus@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/assert-plus/-/assert-plus-1.0.0.tgz#f12e0f3c5d77b0b1cdd9146942e4e96c1e4dd525"
@@ -525,6 +541,11 @@ binaryen@101.0.0-nightly.20210723:
   version "101.0.0-nightly.20210723"
   resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-101.0.0-nightly.20210723.tgz#b6bb7f3501341727681a03866c0856500eec3740"
   integrity sha512-eioJNqhHlkguVSbblHOtLqlhtC882SOEPKmNFZaDuz1hzQjolxZ+eu3/kaS10n3sGPONsIZsO7R9fR00UyhEUA==
+
+binaryen@102.0.0-nightly.20211028:
+  version "102.0.0-nightly.20211028"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-102.0.0-nightly.20211028.tgz#8f1efb0920afd34509e342e37f84313ec936afb2"
+  integrity sha512-GCJBVB5exbxzzvyt8MGDv/MeUjs6gkXDvf4xOIItRBptYl0Tz5sm1o/uG95YK0L0VeG5ajDu3hRtkBP2kzqC5w==
 
 bindings@^1.5.0:
   version "1.5.0"
@@ -2605,6 +2626,11 @@ long@^4.0.0:
   resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
+long@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/long/-/long-5.1.0.tgz#5c0b82eaeea5907176b34bbd3bdcd1bf203ba714"
+  integrity sha512-eNc10JP6ezXp/qxXZlKS4OHAKNae3je9LUkjmXPDEa+Iidlz0n4nFi/9LT+GOgcayMWhykLoISN+v0THeOiWQQ==
+
 looper@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/looper/-/looper-3.0.0.tgz#2efa54c3b1cbaba9b94aee2e5914b0be57fbb749"
@@ -2655,6 +2681,14 @@ map-obj@^4.0.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/map-obj/-/map-obj-4.2.0.tgz#0e8bc823e2aaca8a0942567d12ed14f389eec153"
   integrity sha512-NAq0fCmZYGz9UFEQyndp7sisrow4GroyGeKluyKC/chuITZsPyOyC1UJZPJlVFImhXdROIP5xqouRLThT3BbpQ==
+
+matchstick-as@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/matchstick-as/-/matchstick-as-0.2.0.tgz#6810d4338a0e6aae9111543c1e91c351713e531b"
+  integrity sha512-LBG8eL4oyUnfSsGnnp2KJxP37GwcARuhQl17Etyywdh+LTtMHTiDLTAGNLnzKfN0lNCcqFZEA8PLQ1z1YibyHQ==
+  dependencies:
+    "@graphprotocol/graph-ts" "0.22.0"
+    assemblyscript "^0.19.16"
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -3823,7 +3857,15 @@ sort-package-json@1.49.0:
     is-plain-obj "2.1.0"
     sort-object-keys "^1.1.3"
 
-source-map@^0.6.1:
+source-map-support@^0.5.20:
+  version "0.5.20"
+  resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.20.tgz#12166089f8f5e5e8c56926b377633392dd2cb6c9"
+  integrity sha512-n1lZZ8Ve4ksRqizaBQgxXDgKwttHDhyfQjA6YZZn8+AroHbsIz+JjwxQDxbp+7y5OYCI8t1Yk7etjD9CRd2hIw==
+  dependencies:
+    buffer-from "^1.0.0"
+    source-map "^0.6.0"
+
+source-map@^0.6.0, source-map@^0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
   integrity sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==
