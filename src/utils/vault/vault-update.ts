@@ -36,9 +36,10 @@ function createVaultUpdate(
   managementFees: BigInt,
   performanceFees: BigInt,
   balancePosition: BigInt,
+  totalAssets: BigInt,
   rewards: Address | null = null
 ): VaultUpdate {
-  log.debug('[VaultUpdate] Creating vault update with id {}', [vault.id]);
+  log.debug('[VaultUpdate] Creating vault update with id {}', [id]);
   let vaultUpdate = new VaultUpdate(id);
   vaultUpdate.timestamp = transaction.timestamp;
   vaultUpdate.blockNumber = transaction.blockNumber;
@@ -49,6 +50,7 @@ function createVaultUpdate(
   vaultUpdate.tokensWithdrawn = tokensWithdrawn;
   vaultUpdate.sharesMinted = sharesMinted;
   vaultUpdate.sharesBurnt = sharesBurnt;
+  vaultUpdate.balanceTokens = totalAssets;
   // Performance
   vaultUpdate.pricePerShare = pricePerShare;
   vaultUpdate.totalFees = totalFees;
@@ -57,13 +59,27 @@ function createVaultUpdate(
   vaultUpdate.balancePosition = balancePosition;
   vaultUpdate.rewards = rewards;
 
-  if (vault.balanceTokens.gt(balancePosition)) {
-    vaultUpdate.returnsGenerated = BIGINT_ZERO;
-  } else {
-    vaultUpdate.returnsGenerated = balancePosition.minus(vault.balanceTokens);
-  }
-
+  // NOTE: This returnsGenerated parameter represents the _recognized_ returns since the last VaultUpdate.
+  // Recognized returns are returns which the strategy has paid out to the Vault via Harvest().
+  // Unrecognized returns are returns which have yet to be harvested.
+  // The value of unrecognized returns may change between the time of query and the time of harvest, so we use
+  // recognized returns for the subgraph.
+  vaultUpdate.returnsGenerated = totalAssets
+    .minus(vault.balanceTokens)
+    .minus(tokensDeposited)
+    .plus(tokensWithdrawn);
   vaultUpdate.save();
+
+  vault.latestUpdate = vaultUpdate.id;
+  vault.balanceTokens = totalAssets;
+  // todo: current implementation of balanceTokensIdle does not update when debt is issued to strategies
+  vault.balanceTokensIdle = vault.balanceTokensIdle
+    .plus(tokensDeposited)
+    .minus(tokensWithdrawn);
+  // todo: balanceTokensInvested
+  vault.sharesSupply = vault.sharesSupply.plus(sharesMinted).minus(sharesBurnt);
+  vault.save();
+
   return vaultUpdate;
 }
 
@@ -73,7 +89,8 @@ export function firstDeposit(
   depositedAmount: BigInt,
   sharesMinted: BigInt,
   pricePerShare: BigInt,
-  balancePosition: BigInt
+  balancePosition: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   log.debug('[VaultUpdate] First deposit', []);
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
@@ -92,7 +109,8 @@ export function firstDeposit(
       BIGINT_ZERO,
       BIGINT_ZERO,
       BIGINT_ZERO,
-      balancePosition
+      balancePosition,
+      totalAssets
     );
   }
 
@@ -105,7 +123,8 @@ export function deposit(
   depositedAmount: BigInt,
   sharesMinted: BigInt,
   pricePerShare: BigInt,
-  balancePosition: BigInt
+  balancePosition: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   log.debug('[VaultUpdate] Deposit', []);
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
@@ -128,7 +147,8 @@ export function deposit(
       latestVaultUpdate!.totalFees,
       latestVaultUpdate!.managementFees,
       latestVaultUpdate!.performanceFees,
-      balancePosition
+      balancePosition,
+      totalAssets
     );
   }
 
@@ -142,7 +162,8 @@ export function withdraw(
   withdrawnAmount: BigInt,
   sharesBurnt: BigInt,
   transaction: Transaction,
-  balancePosition: BigInt
+  balancePosition: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
   let newVaultUpdate = createVaultUpdate(
@@ -157,14 +178,9 @@ export function withdraw(
     latestVaultUpdate.totalFees,
     latestVaultUpdate.managementFees,
     latestVaultUpdate.performanceFees,
-    balancePosition
+    balancePosition,
+    totalAssets
   );
-  vault.sharesSupply = vault.sharesSupply.minus(sharesBurnt);
-  vault.balanceTokens = vault.balanceTokens.minus(withdrawnAmount);
-  vault.balanceTokensIdle = vault.balanceTokensIdle.minus(withdrawnAmount);
-
-  vault.latestUpdate = newVaultUpdate.id;
-  vault.save();
   return newVaultUpdate;
 }
 
@@ -173,7 +189,8 @@ export function strategyReported(
   latestVaultUpdate: VaultUpdate,
   transaction: Transaction,
   pricePerShare: BigInt,
-  balancePosition: BigInt
+  balancePosition: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
   let newVaultUpdate = createVaultUpdate(
@@ -188,10 +205,9 @@ export function strategyReported(
     latestVaultUpdate.totalFees,
     latestVaultUpdate.managementFees,
     latestVaultUpdate.performanceFees,
-    balancePosition
+    balancePosition,
+    totalAssets
   );
-  vault.latestUpdate = newVaultUpdate.id;
-  vault.save();
   return newVaultUpdate;
 }
 
@@ -200,7 +216,8 @@ export function performanceFeeUpdated(
   transaction: Transaction,
   latestVaultUpdate: VaultUpdate,
   balancePosition: BigInt,
-  performanceFee: BigInt
+  performanceFee: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
   let newVaultUpdate = createVaultUpdate(
@@ -215,7 +232,8 @@ export function performanceFeeUpdated(
     latestVaultUpdate.totalFees,
     BIGINT_ZERO,
     performanceFee,
-    balancePosition
+    balancePosition,
+    totalAssets
   );
   return newVaultUpdate;
 }
@@ -225,7 +243,8 @@ export function managementFeeUpdated(
   transaction: Transaction,
   latestVaultUpdate: VaultUpdate,
   balancePosition: BigInt,
-  managementFee: BigInt
+  managementFee: BigInt,
+  totalAssets: BigInt
 ): VaultUpdate {
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
   let newVaultUpdate = createVaultUpdate(
@@ -240,7 +259,8 @@ export function managementFeeUpdated(
     latestVaultUpdate.totalFees,
     managementFee,
     BIGINT_ZERO,
-    balancePosition
+    balancePosition,
+    totalAssets
   );
   return newVaultUpdate;
 }
@@ -250,6 +270,7 @@ export function rewardsUpdated(
   transaction: Transaction,
   latestVaultUpdate: VaultUpdate,
   balancePosition: BigInt,
+  totalAssets: BigInt,
   rewards: Address
 ): VaultUpdate {
   let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
@@ -266,6 +287,7 @@ export function rewardsUpdated(
     BIGINT_ZERO,
     BIGINT_ZERO,
     balancePosition,
+    totalAssets,
     rewards
   );
   return newVaultUpdate;

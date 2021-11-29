@@ -1,10 +1,10 @@
 import { assert } from 'matchstick-as/assembly/index';
-import { Registry as RegistrySchema } from '../generated/schema';
-import { handleNewReleaseInner } from '../src/mappings/registryMappings';
+import { Registry as RegistrySchema } from '../../generated/schema';
+import { handleNewReleaseInner } from '../../src/mappings/registryMappings';
 import { BigInt, ethereum, log, Address } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as';
-import { NewRelease } from '../generated/Registry/Registry';
-import { defaults } from './default';
+import { NewRelease } from '../../generated/Registry/Registry';
+import { defaults } from '../default';
 
 export function createMockNewReleaseEvent(
   release_id: i32,
@@ -44,7 +44,7 @@ export function createMockNewReleaseEvent(
 }
 
 export function createRegistryV1Entity(
-  registry_address: string
+  registryAddress: Address
 ): RegistrySchema {
   log.info('[TEST] Creating mocked NewReleaseEvent', ['']);
   let release_id = defaults.i32;
@@ -58,9 +58,9 @@ export function createRegistryV1Entity(
   );
 
   log.info('[TEST] Calling handleNewReleaseInner with mocked event', []);
-  handleNewReleaseInner(Address.fromString(registry_address), mockEvent);
+  handleNewReleaseInner(registryAddress, mockEvent);
 
-  let registry = RegistrySchema.load(registry_address);
+  let registry = RegistrySchema.load(registryAddress.toHexString());
   assert.assertNotNull(registry);
   return registry as RegistrySchema;
 }

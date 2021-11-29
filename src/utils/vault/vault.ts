@@ -177,7 +177,15 @@ export function deposit(
   sharesMinted: BigInt,
   timestamp: BigInt
 ): void {
-  log.debug('[Vault] Deposit', []);
+  log.debug(
+    '[Vault] Deposit vault: {} receiver: {} depositAmount: {} sharesMinted: {}',
+    [
+      vaultAddress.toHexString(),
+      receiver.toHexString(),
+      depositedAmount.toString(),
+      sharesMinted.toString(),
+    ]
+  );
   let vaultContract = VaultContract.bind(vaultAddress);
   let account = accountLibrary.getOrCreate(receiver);
   let pricePerShare = vaultContract.pricePerShare();
@@ -202,6 +210,7 @@ export function deposit(
 
   let vaultUpdate: VaultUpdate;
   let balancePosition = getBalancePosition(vaultContract);
+  let totalAssets = getTotalAssets(vaultContract);
   if (vault.latestUpdate == null) {
     vaultUpdate = vaultUpdateLibrary.firstDeposit(
       vault,
@@ -209,7 +218,8 @@ export function deposit(
       depositedAmount,
       sharesMinted,
       pricePerShare,
-      balancePosition
+      balancePosition,
+      totalAssets
     );
   } else {
     vaultUpdate = vaultUpdateLibrary.deposit(
@@ -218,7 +228,8 @@ export function deposit(
       depositedAmount,
       sharesMinted,
       pricePerShare,
-      balancePosition
+      balancePosition,
+      totalAssets
     );
   }
 
@@ -232,13 +243,6 @@ export function deposit(
     vaultUpdate.returnsGenerated,
     vaultContract.decimals()
   );
-
-  vault.latestUpdate = vaultUpdate.id;
-  vault.balanceTokens = vault.balanceTokens.plus(depositedAmount);
-  vault.balanceTokensIdle = vault.balanceTokensIdle.plus(depositedAmount);
-  vault.sharesSupply = vault.sharesSupply.plus(sharesMinted);
-
-  vault.save();
 }
 
 export function isVault(vaultAddress: Address): boolean {
@@ -353,7 +357,8 @@ export function withdraw(
         withdrawnAmount,
         sharesBurnt,
         transaction,
-        balancePosition
+        balancePosition,
+        getTotalAssets(vaultContract)
       );
 
       updateVaultDayData(
@@ -367,6 +372,9 @@ export function withdraw(
         vaultContract.decimals()
       );
     }
+  } else {
+    // log.critical("[Vault] latestVaultUpdate is null and someone is calling withdraw(). Vault: {}", [vault.id.toString()])
+    // it turns out it is happening
   }
 }
 
@@ -429,7 +437,8 @@ export function strategyReported(
         latestVaultUpdate as VaultUpdate,
         transaction,
         pricePerShare,
-        balancePosition
+        balancePosition,
+        getTotalAssets(vaultContract)
       );
     }
   }
@@ -457,7 +466,8 @@ export function performanceFeeUpdated(
           ethTransaction,
           latestVaultUpdate as VaultUpdate,
           getBalancePosition(vaultContract),
-          performanceFee
+          performanceFee,
+          getTotalAssets(vaultContract)
         ) as VaultUpdate;
         vault.latestUpdate = vaultUpdate.id;
       }
@@ -495,7 +505,8 @@ export function managementFeeUpdated(
           ethTransaction,
           latestVaultUpdate as VaultUpdate,
           getBalancePosition(vaultContract),
-          managementFee
+          managementFee,
+          getTotalAssets(vaultContract)
         ) as VaultUpdate;
         vault.latestUpdate = vaultUpdate.id;
       }
@@ -567,6 +578,7 @@ export function handleUpdateRewards(
           ethTransaction,
           latestVaultUpdate as VaultUpdate,
           getBalancePosition(vaultContract),
+          getTotalAssets(vaultContract),
           rewards
         ) as VaultUpdate;
         vault.latestUpdate = vaultUpdate.id;
@@ -604,6 +616,10 @@ function getBalancePosition(vaultContract: VaultContract): BigInt {
   // @ts-ignore
   let decimals = u8(vaultContract.decimals().toI32());
   return totalAssets.times(pricePerShare).div(BigInt.fromI32(10).pow(decimals));
+}
+
+function getTotalAssets(vaultContract: VaultContract): BigInt {
+  return vaultContract.totalAssets();
 }
 
 export function createCustomVaultIfNeeded(
