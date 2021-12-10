@@ -1,4 +1,4 @@
-import { Deposit1Call, Deposit2Call } from '../../generated/Registry/Vault';
+import { Deposit1Call, Withdraw1Call } from '../../generated/Registry/Vault';
 import {
   BigInt,
   ethereum,
@@ -7,7 +7,7 @@ import {
   Bytes,
   ByteArray,
 } from '@graphprotocol/graph-ts';
-import { newMockCall } from 'matchstick-as';
+import { MockedFunction, newMockCall } from 'matchstick-as';
 
 export function createMockDeposit1Call(
   transactionHash: Bytes,
@@ -35,4 +35,41 @@ export function createMockDeposit1Call(
 
   newDepositCall.outputValues.push(sharesMintedParam);
   return newDepositCall;
+}
+
+export function createMockWithdraw1Call(
+  transactionHash: Bytes,
+  vaultAddress: Address,
+  senderAddress: Address,
+  sharesBurned: BigInt,
+  tokensReturned: BigInt
+): Withdraw1Call {
+  let mockCall = newMockCall();
+  mockCall.transaction.hash = transactionHash;
+
+  let newWithdrawCall = new Withdraw1Call(
+    vaultAddress,
+    senderAddress,
+    mockCall.block,
+    mockCall.transaction,
+    mockCall.inputValues,
+    mockCall.outputValues
+  );
+
+  newWithdrawCall.outputValues = new Array();
+  newWithdrawCall.inputValues = new Array();
+
+  let sharesBurnedParam = new ethereum.EventParam(
+    'shares',
+    ethereum.Value.fromUnsignedBigInt(sharesBurned)
+  );
+
+  let tokensReturnedParam = new ethereum.EventParam(
+    'value0',
+    ethereum.Value.fromUnsignedBigInt(tokensReturned)
+  );
+
+  newWithdrawCall.inputValues.push(sharesBurnedParam);
+  newWithdrawCall.outputValues.push(tokensReturnedParam);
+  return newWithdrawCall;
 }

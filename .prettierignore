@@ -22,3 +22,5 @@ subgraph.yaml
 node_modules
 yarn.lock
 yarn-error.log
+out/
+config.json.example

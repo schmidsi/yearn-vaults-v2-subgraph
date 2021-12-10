@@ -264,7 +264,6 @@ export function withdraw(
   let account = accountLibrary.getOrCreate(from);
   let balancePosition = getBalancePosition(vaultContract);
   let vault = getOrCreate(vaultAddress, transaction, DO_CREATE_VAULT_TEMPLATE);
-
   withdrawalLibrary.getOrCreate(
     account,
     vault,
@@ -321,6 +320,10 @@ export function withdraw(
 
         As TheGraph doesn't support to process blocks before the vault was registered (using the template feature), these cases are treated as special cases (pending to fix).
     */
+    log.warning(
+      '[Vault] AccountVaultPosition for vault {} did not exist when withdrawl was executed. Missing position id: {}',
+      [vaultAddress.toHexString(), accountVaultPositionId]
+    );
     if (withdrawnAmount.isZero()) {
       log.warning(
         'INVALID zero amount withdraw: Account vault position NOT found. ID {} Vault {} TX {} from {}',
@@ -373,7 +376,10 @@ export function withdraw(
       );
     }
   } else {
-    // log.critical("[Vault] latestVaultUpdate is null and someone is calling withdraw(). Vault: {}", [vault.id.toString()])
+    log.warning(
+      '[Vault] latestVaultUpdate is null and someone is calling withdraw(). Vault: {}',
+      [vault.id.toString()]
+    );
     // it turns out it is happening
   }
 }

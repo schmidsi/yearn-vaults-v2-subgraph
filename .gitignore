@@ -109,3 +109,5 @@ package-lock.json
 .idea
 analysis
 *.wasm
+out/
+tests/fixtureGenerator/config.json

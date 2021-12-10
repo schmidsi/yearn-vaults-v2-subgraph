@@ -8,16 +8,22 @@ import {
   ethereum,
 } from '@graphprotocol/graph-ts';
 import { createRegistryV1Entity } from './util/registryEvents';
-import { createMockDeposit1Call } from './util/vaultCalls';
+import {
+  createMockDeposit1Call,
+  createMockWithdraw1Call,
+} from './util/vaultCalls';
 import { createMockAddStrategyV1Call } from './util/strategyCalls';
 import { createMockNewVaultEvent } from './util/vaultEvents';
 import {
   handleDeposit,
+  handleWithdrawWithShares,
   handleAddStrategy,
+  handleWithdraw,
 } from '../src/mappings/vaultMappings';
 import { CreateMockUSDCVault_1 } from './fixtures/CreateMockUSDCVault_1';
 import { AddStrategyToUSDCVault_2 } from './fixtures/AddStrategyToUSDCVault_2';
 import { DepositToVaultWithSpecAmount_3 } from './fixtures/DepositToVaultWithSpecAmount_3';
+import { WithdrawFromVaultWithSpecAmount_4 } from './fixtures/WithdrawFromVaultWithSpecAmount_4';
 import { handleNewVaultInner } from '../src/mappings/registryMappings';
 import {
   Vault as VaultSchema,
@@ -35,10 +41,9 @@ test('Can create registry via NewRelease event', () => {
 });
 
 test('Can create a Vault entity via NewVault event', () => {
-  CreateMockUSDCVault_1();
-  // from CreateMockUSDCVault_1. Eventually this should be de-duplicated
-  let vaultAddress = '0x5f18c75abdae578b483e5f43f12a39cf75b973a9';
-  let wantTokenAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+  CreateMockUSDCVault_1.mockChainState();
+  let vaultAddress = CreateMockUSDCVault_1.VaultAddress;
+  let wantTokenAddress = CreateMockUSDCVault_1.WantTokenAddress;
   let apiVersion = '0.3.0';
 
   let mockEvent = createMockNewVaultEvent(
@@ -62,10 +67,9 @@ test('Can create a Vault entity via NewVault event', () => {
 });
 
 test('Can add a strategy to a vault using handleAddStrategyV1 (call)', () => {
-  AddStrategyToUSDCVault_2();
-  // from AddStrategyToUSDCVault_2
-  let vaultAddress = '0x5f18c75abdae578b483e5f43f12a39cf75b973a9';
-  let strategyAddress = '0x4d7d4485fd600c61d840ccbec328bfd76a050f87';
+  AddStrategyToUSDCVault_2.mockChainState();
+  let vaultAddress = AddStrategyToUSDCVault_2.VaultAddress;
+  let strategyAddress = AddStrategyToUSDCVault_2.StrategyAddress;
 
   // from https://etherscan.io/tx/0x3e059ed2652468576e10ea90bc1c3fcf2f125bbdb31c2f9063cb5108c68e1c59#eventlog
   let debtLimit = '9500';
@@ -88,14 +92,14 @@ test('Can add a strategy to a vault using handleAddStrategyV1 (call)', () => {
 });
 
 test('Can perform an initial deposit into a Vault using a deposit1 (call)', () => {
-  DepositToVaultWithSpecAmount_3();
+  DepositToVaultWithSpecAmount_3.mockChainState();
   // from DepositToVaultWithSpecAmount_3
-  let depositor = '0x253c5cbdd08838dad5493d511e17aa1ac5eab51b';
+  let depositor = DepositToVaultWithSpecAmount_3.DepositorAddress;
+  let vaultAddress = DepositToVaultWithSpecAmount_3.VaultAddress;
+  let wantAddress = DepositToVaultWithSpecAmount_3.WantTokenAddress;
+  let sharesMinted = '79056085';
   let txnHash =
     '0xc1c33bd1a42e6c57134275be180376ef79d4e3b5a09162640ea3d01fb96e8ce6';
-  let vaultAddress = '0x5f18c75abdae578b483e5f43f12a39cf75b973a9';
-  let wantAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-  let sharesMinted = '79056085';
 
   let mockCall = createMockDeposit1Call(
     Bytes.fromByteArray(ByteArray.fromHexString(txnHash)),
@@ -274,6 +278,112 @@ test('Can perform an initial deposit into a Vault using a deposit1 (call)', () =
   assert.fieldEquals('Deposit', depositId, 'tokenAmount', sharesMinted);
   assert.fieldEquals('Deposit', depositId, 'sharesMinted', sharesMinted);
   assert.fieldEquals('Deposit', depositId, 'transaction', transactionHashId);
+});
+
+test('Can perform a withdrawl from a Vault using withdraw (amount) (call)', () => {
+  WithdrawFromVaultWithSpecAmount_4.mockChainState();
+  let vaultAddress = WithdrawFromVaultWithSpecAmount_4.VaultAddress;
+  let depositor = WithdrawFromVaultWithSpecAmount_4.DepositorAddress;
+  let wantAddress = WithdrawFromVaultWithSpecAmount_4.WantTokenAddress;
+  let txnHash =
+    '0xfbe5fe8f992480569f67f96dc35af74dfd38b0c20cae2e7cd9d949d9629e997b';
+  let sharesBurned = '79056085';
+
+  let mockCall = createMockWithdraw1Call(
+    Bytes.fromByteArray(ByteArray.fromHexString(txnHash)),
+    Address.fromString(vaultAddress),
+    Address.fromString(depositor),
+    BigInt.fromString(sharesBurned),
+    BigInt.fromString(sharesBurned)
+  );
+  handleWithdrawWithShares(mockCall);
+
+  let positionId = depositor.concat('-').concat(vaultAddress);
+  assert.fieldEquals('AccountVaultPosition', positionId, 'balanceShares', '0');
+  assert.fieldEquals('AccountVaultPosition', positionId, 'balanceTokens', '0');
+  // todo: The AccountVaultPosition.balanceProfit field appears to returning inaccurate results, so cannot be tested.
+  /*
+  assert.fieldEquals(
+    'AccountVaultPosition',
+    positionId,
+    'balanceProfit',
+    "0"
+  );
+  */
+
+  // Verify VaultUpdate
+  let transactionIndex = '1'; // todo: get from transaction
+  let logIndex = '1'; // todo: get from transaction
+  // from _getOrCreateTransaction
+  let transactionHashId = txnHash.concat('-').concat(logIndex);
+  // from buildIdFromVaultAndTransaction
+  let vaultUpdateId = vaultAddress
+    .concat('-')
+    .concat(transactionHashId.concat('-').concat(transactionIndex));
+  // todo: get from chain?
+  let pricePerShare = BigInt.fromString('10').pow(u8(6));
+
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'id', vaultUpdateId);
+  assert.fieldEquals(
+    'VaultUpdate',
+    vaultUpdateId,
+    'transaction',
+    transactionHashId
+  );
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'vault', vaultAddress);
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'tokensDeposited', '0');
+  assert.fieldEquals(
+    'VaultUpdate',
+    vaultUpdateId,
+    'tokensWithdrawn',
+    sharesBurned
+  );
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'sharesMinted', '0');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'sharesBurnt', sharesBurned);
+  assert.fieldEquals(
+    'VaultUpdate',
+    vaultUpdateId,
+    'pricePerShare',
+    pricePerShare.toString()
+  );
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'totalFees', '0');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'managementFees', '0');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'performanceFees', '0');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'returnsGenerated', '0');
+
+  // todo: get newOrder from transaction
+  let newOrder = '1';
+  let positionUpdateId = depositor
+    .concat('-')
+    .concat(vaultAddress.concat('-').concat(newOrder));
+
+  assert.fieldEquals(
+    'AccountVaultPositionUpdate',
+    positionUpdateId,
+    'sharesBurnt',
+    sharesBurned
+  );
+  assert.fieldEquals(
+    'AccountVaultPositionUpdate',
+    positionUpdateId,
+    'balanceShares',
+    '0'
+  );
+  assert.fieldEquals(
+    'AccountVaultPositionUpdate',
+    positionUpdateId,
+    'withdrawals',
+    sharesBurned
+  );
+
+  let withdrawlId = depositor
+    .concat('-')
+    .concat(transactionHashId)
+    .concat('-')
+    .concat(transactionIndex);
+  assert.fieldEquals('Withdrawal', withdrawlId, 'id', withdrawlId);
+  assert.fieldEquals('Withdrawal', withdrawlId, 'tokenAmount', sharesBurned);
+  assert.fieldEquals('Withdrawal', withdrawlId, 'sharesBurnt', sharesBurned);
 });
 
 clearStore();

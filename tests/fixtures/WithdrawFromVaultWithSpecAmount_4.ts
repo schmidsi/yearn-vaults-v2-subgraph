@@ -9,28 +9,23 @@ import {
   ByteArray,
 } from '@graphprotocol/graph-ts';
 
-export namespace DepositToVaultWithSpecAmount_3 {
+export namespace WithdrawFromVaultWithSpecAmount_4 {
   export const VaultAddress = '0x5f18c75abdae578b483e5f43f12a39cf75b973a9';
   export const WantTokenAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
-  export const Block = '11680659';
+  export const Block = '11680761';
   export const DepositorAddress = '0x253c5cbdd08838dad5493d511e17aa1ac5eab51b';
-  export const OracleAddress = '0x83d95e0d5f402511db06817aff3f9ea88224b030';
   export function mockChainState(): void {
     createMockedFunction(
       Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
       'totalSupply',
       'totalSupply():(uint256)'
-    ).returns([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString('79056085')),
-    ]);
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
 
     createMockedFunction(
       Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
       'totalAssets',
       'totalAssets():(uint256)'
-    ).returns([
-      ethereum.Value.fromUnsignedBigInt(BigInt.fromString('79056085')),
-    ]);
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
 
     createMockedFunction(
       Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
@@ -114,9 +109,7 @@ export namespace DepositToVaultWithSpecAmount_3 {
           Address.fromString('0x253c5cbdd08838dad5493d511e17aa1ac5eab51b')
         ),
       ])
-      .returns([
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('79056085')),
-      ]);
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
 
     createMockedFunction(
       Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
@@ -152,7 +145,9 @@ export namespace DepositToVaultWithSpecAmount_3 {
           Address.fromString('0x253c5cbdd08838dad5493d511e17aa1ac5eab51b')
         ),
       ])
-      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
+      .returns([
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('79056085')),
+      ]);
 
     createMockedFunction(
       Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
@@ -164,9 +159,7 @@ export namespace DepositToVaultWithSpecAmount_3 {
           Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9')
         ),
       ])
-      .returns([
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('79056085')),
-      ]);
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
 
     createMockedFunction(
       Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
@@ -179,45 +172,5 @@ export namespace DepositToVaultWithSpecAmount_3 {
       'name',
       'name():(string)'
     ).returns([ethereum.Value.fromString('USD Coin')]);
-
-    createMockedFunction(
-      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
-      'getNormalizedValueUsdc',
-      'getNormalizedValueUsdc(address,uint128):(uint256)'
-    )
-      .withArgs([
-        ethereum.Value.fromAddress(
-          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
-        ),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1')),
-      ])
-      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
-
-    createMockedFunction(
-      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
-      'try_getNormalizedValueUsdc',
-      'getNormalizedValueUsdc(address,uint128):(uint256)'
-    )
-      .withArgs([
-        ethereum.Value.fromAddress(
-          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
-        ),
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1')),
-      ])
-      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
-
-    createMockedFunction(
-      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
-      'getPriceUsdcRecommended',
-      'getPriceUsdcRecommended(address):(uint256)'
-    )
-      .withArgs([
-        ethereum.Value.fromAddress(
-          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
-        ),
-      ])
-      .returns([
-        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1000000')),
-      ]);
   }
 }

@@ -17,6 +17,7 @@
     "deploy:fantom": "yarn prepare:fantom && yarn build:fantom && yarn thegraph:deploy:fantom",
     "release": "standard-version",
     "test": "graph test",
+    "build:fixtures": "tsc -b && node ./tests/fixtureGenerator/out/main.js",
     "deploy:mainnet": "yarn prepare:mainnet && yarn build:mainnet && yarn thegraph:deploy:mainnet",
     "lint:check": "prettier --check './**'",
     "lint:fix": "sort-package-json && prettier --write './**'",
@@ -28,7 +29,9 @@
     "@graphprotocol/graph-cli": "^0.23.0",
     "@graphprotocol/graph-ts": "^0.23.0",
     "matchstick-as": "^0.2.0",
-    "mustache": "4.1.0"
+    "mustache": "4.1.0",
+    "typescript": "^4.5.2",
+    "web3-eth": "^1.6.1"
   },
   "devDependencies": {
     "@commitlint/cli": "12.0.1",
