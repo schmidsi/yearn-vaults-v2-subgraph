@@ -20,6 +20,9 @@ export const FTM_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS =
 export const DEFAULT_DECIMALS = 18;
 export let BIGINT_ZERO = BigInt.fromI32(0);
 export let BIGINT_ONE = BigInt.fromI32(1);
+export let BIGINT_MAX = BigInt.fromString(
+  '115792089237316195423570985008687907853269984665640564039457584007913129639935'
+);
 export let BIGDECIMAL_ZERO = new BigDecimal(BIGINT_ZERO);
 export let MAX_UINT = BigInt.fromI32(2).times(BigInt.fromI32(255));
 export let DAYS_PER_YEAR = new BigDecimal(BigInt.fromI32(365));

@@ -9,7 +9,7 @@ import {
 } from '@graphprotocol/graph-ts';
 import { MockedFunction, newMockCall } from 'matchstick-as';
 
-export function createMockDeposit1Call(
+export function createMockDepositCall(
   transactionHash: Bytes,
   vaultAddress: Address,
   recipientUserAccountAddress: Address,
@@ -34,6 +34,42 @@ export function createMockDeposit1Call(
   );
 
   newDepositCall.outputValues.push(sharesMintedParam);
+  return newDepositCall;
+}
+
+export function createMockDeposit1Call(
+  transactionHash: Bytes,
+  vaultAddress: Address,
+  recipientUserAccountAddress: Address,
+  sharesMinted: BigInt,
+  amountDeposited: BigInt
+): Deposit1Call {
+  let mockCall = newMockCall();
+  mockCall.transaction.hash = transactionHash;
+
+  let newDepositCall = new Deposit1Call(
+    vaultAddress,
+    recipientUserAccountAddress,
+    mockCall.block,
+    mockCall.transaction,
+    mockCall.inputValues,
+    mockCall.outputValues
+  );
+
+  newDepositCall.outputValues = new Array();
+  newDepositCall.inputValues = new Array();
+  let sharesMintedParam = new ethereum.EventParam(
+    'value0',
+    ethereum.Value.fromUnsignedBigInt(sharesMinted)
+  );
+
+  let amountDepositedParam = new ethereum.EventParam(
+    '_amount',
+    ethereum.Value.fromUnsignedBigInt(amountDeposited)
+  );
+
+  newDepositCall.outputValues.push(sharesMintedParam);
+  newDepositCall.inputValues.push(amountDepositedParam);
   return newDepositCall;
 }
 

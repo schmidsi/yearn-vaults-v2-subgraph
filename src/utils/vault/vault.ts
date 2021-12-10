@@ -245,6 +245,29 @@ export function deposit(
   );
 }
 
+/* Calculates the amount of tokens deposited via totalAssets/totalSupply arithmetic. */
+export function calculateAmountDeposited(
+  vaultAddress: Address,
+  sharesMinted: BigInt
+): BigInt {
+  let vaultContract = VaultContract.bind(vaultAddress);
+  let totalAssets = vaultContract.totalAssets();
+  let totalSupply = vaultContract.totalSupply();
+  let amount = totalSupply.isZero()
+    ? BIGINT_ZERO
+    : sharesMinted.times(totalAssets).div(totalSupply);
+  log.info(
+    '[Vault] Indirectly calculating token qty deposited. shares minted: {} - total assets {} - total supply {} - calc deposited tokens: {}',
+    [
+      sharesMinted.toString(),
+      totalAssets.toString(),
+      totalSupply.toString(),
+      amount.toString(),
+    ]
+  );
+  return amount;
+}
+
 export function isVault(vaultAddress: Address): boolean {
   let id = buildId(vaultAddress);
   let vault = Vault.load(id);

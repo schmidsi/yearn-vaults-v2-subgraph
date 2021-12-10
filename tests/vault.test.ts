@@ -10,6 +10,7 @@ import {
 import { createRegistryV1Entity } from './util/registryEvents';
 import {
   createMockDeposit1Call,
+  createMockDepositCall,
   createMockWithdraw1Call,
 } from './util/vaultCalls';
 import { createMockAddStrategyV1Call } from './util/strategyCalls';
@@ -101,7 +102,7 @@ test('Can perform an initial deposit into a Vault using a deposit1 (call)', () =
   let txnHash =
     '0xc1c33bd1a42e6c57134275be180376ef79d4e3b5a09162640ea3d01fb96e8ce6';
 
-  let mockCall = createMockDeposit1Call(
+  let mockCall = createMockDepositCall(
     Bytes.fromByteArray(ByteArray.fromHexString(txnHash)),
     Address.fromString(vaultAddress),
     Address.fromString(depositor),

@@ -22,7 +22,7 @@ import {
 } from '../../generated/Registry/Vault';
 import { Strategy } from '../../generated/schema';
 import { printCallInfo } from '../utils/commons';
-import { BIGINT_ZERO, ZERO_ADDRESS } from '../utils/constants';
+import { BIGINT_ZERO, BIGINT_MAX, ZERO_ADDRESS } from '../utils/constants';
 import * as strategyLibrary from '../utils/strategy/strategy';
 import {
   getOrCreateTransactionFromCall,
@@ -237,19 +237,11 @@ export function handleDeposit(call: DepositCall): void {
     return;
   }
   let transaction = getOrCreateTransactionFromCall(call, 'vault.deposit()');
-  let vaultContract = VaultContract.bind(call.to);
-  let totalAssets = vaultContract.totalAssets();
-  let totalSupply = vaultContract.totalSupply();
-  let sharesAmount = call.outputs.value0;
-  log.info(
-    '[Vault mappings] Handle deposit() shares {} - total assets {} - total supply {}',
-    [sharesAmount.toString(), totalAssets.toString(), totalSupply.toString()]
-  );
-  let amount = totalSupply.isZero()
-    ? BIGINT_ZERO
-    : sharesAmount.times(totalAssets).div(totalSupply);
+  let sharesMinted = call.outputs.value0;
+  let amount = vaultLibrary.calculateAmountDeposited(call.to, sharesMinted);
+
   log.info('[Vault mappings] Handle deposit() shares {} - amount {}', [
-    sharesAmount.toString(),
+    sharesMinted.toString(),
     amount.toString(),
   ]);
   vaultLibrary.deposit(
@@ -257,7 +249,7 @@ export function handleDeposit(call: DepositCall): void {
     transaction,
     call.from,
     amount,
-    call.outputs.value0,
+    sharesMinted,
     call.block.timestamp
   );
 }
@@ -276,12 +268,21 @@ export function handleDepositWithAmount(call: Deposit1Call): void {
     return;
   }
   let transaction = getOrCreateTransactionFromCall(call, 'vault.deposit(uint)');
+  let sharesMinted = call.outputs.value0;
+
+  // If _amount is uint256.max, the vault contract treats this like deposit()
+  // https://github.com/yearn/yearn-vaults/blob/main/contracts/Vault.vy#L894-L897
+  let amount = call.inputs._amount;
+  if (amount == BIGINT_MAX) {
+    amount = vaultLibrary.calculateAmountDeposited(call.to, sharesMinted);
+  }
+
   vaultLibrary.deposit(
     call.to, // Vault Address
     transaction,
     call.from,
-    call.inputs._amount,
-    call.outputs.value0,
+    amount,
+    sharesMinted,
     call.block.timestamp
   );
 }
@@ -322,12 +323,21 @@ export function handleDepositWithAmountAndRecipient(call: Deposit2Call): void {
     call.inputs._recipient.toHexString(),
   ]);
   printCallInfo('TXDeposit', call);
+
+  let sharesMinted = call.outputs.value0;
+  // If _amount is uint256.max, the vault contract treats this like deposit()
+  // https://github.com/yearn/yearn-vaults/blob/main/contracts/Vault.vy#L894-L897
+  let amount = call.inputs._amount;
+  if (amount == BIGINT_MAX) {
+    amount = vaultLibrary.calculateAmountDeposited(call.to, sharesMinted);
+  }
+
   vaultLibrary.deposit(
     call.to, // Vault Address
     transaction,
     call.inputs._recipient, // Recipient
-    call.inputs._amount,
-    call.outputs.value0,
+    amount,
+    sharesMinted,
     call.block.timestamp
   );
 }
