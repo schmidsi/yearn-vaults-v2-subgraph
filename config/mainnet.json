@@ -17,10 +17,10 @@
   "ftmYvDAIVaultAddress": "0x0000000000000000000000000000000000000000",
   "ftmYvYFIVaultAddress": "0x0000000000000000000000000000000000000000",
   "ftmYv2CRVVaultAddress": "0x0000000000000000000000000000000000000000",
-  "ftmYvWFTMVaultStartBlock": "12542630",
-  "ftmYvMIMVaultStartBlock": "12542630",
-  "ftmYvUSDCVaultStartBlock": "12542630",
-  "ftmYvDAIVaultStartBlock": "12542630",
-  "ftmYvYFIVaultStartBlock": "12542630",
-  "ftmYv2CRVVaultStartBlock": "12542630"
+  "ftmYvWFTMVaultStartBlock": "2147483647",
+  "ftmYvMIMVaultStartBlock": "2147483647",
+  "ftmYvUSDCVaultStartBlock": "2147483647",
+  "ftmYvDAIVaultStartBlock": "2147483647",
+  "ftmYvYFIVaultStartBlock": "2147483647",
+  "ftmYv2CRVVaultStartBlock": "2147483647"
 }
