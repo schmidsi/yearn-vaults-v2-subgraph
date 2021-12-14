@@ -773,6 +773,7 @@ templates:
       entities:
         - Vault
         - Strategy
+        - StrategyMigration
         - VaultUpdate
         - Transfer
         - Account

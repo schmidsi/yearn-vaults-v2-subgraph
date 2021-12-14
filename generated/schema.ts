@@ -6,6 +6,7 @@ import {
   Value,
   ValueKind,
   store,
+  Address,
   Bytes,
   BigInt,
   BigDecimal
@@ -1906,6 +1907,92 @@ export class Strategy extends Entity {
 
   set harvests(value: Array<string>) {
     this.set("harvests", Value.fromStringArray(value));
+  }
+}
+
+export class StrategyMigration extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+
+    this.set("oldStrategy", Value.fromString(""));
+    this.set("newStrategy", Value.fromString(""));
+    this.set("blockNumber", Value.fromBigInt(BigInt.zero()));
+    this.set("timestamp", Value.fromBigInt(BigInt.zero()));
+    this.set("transaction", Value.fromString(""));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save StrategyMigration entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save StrategyMigration entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("StrategyMigration", id.toString(), this);
+    }
+  }
+
+  static load(id: string): StrategyMigration | null {
+    return changetype<StrategyMigration | null>(
+      store.get("StrategyMigration", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get oldStrategy(): string {
+    let value = this.get("oldStrategy");
+    return value!.toString();
+  }
+
+  set oldStrategy(value: string) {
+    this.set("oldStrategy", Value.fromString(value));
+  }
+
+  get newStrategy(): string {
+    let value = this.get("newStrategy");
+    return value!.toString();
+  }
+
+  set newStrategy(value: string) {
+    this.set("newStrategy", Value.fromString(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value!.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value!.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value!.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
   }
 }
 
