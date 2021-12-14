@@ -1,9 +1,9 @@
-name: Lint
+name: Run Matchstick tests
 
 on: [push, pull_request]
 
 jobs:
-  files:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,17 +32,11 @@ jobs:
       - name: Install dependencies
         run: yarn --frozen-lockfile
 
-      - name: Run linter
-        run: yarn lint:check
+      - name: Build subgraph.yaml for mainnet
+        run: yarn prepare:mainnet
 
-  commits:
-    runs-on: ubuntu-latest
+      - name: Run graph codegen
+        run: yarn codegen
 
-    steps:
-      - name: Check out github repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Run commitlint
-        uses: wagoid/commitlint-github-action@v2
+      - name: Run matchstick tests
+        run: yarn test
