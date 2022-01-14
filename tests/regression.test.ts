@@ -9,7 +9,6 @@ import {
 } from '@graphprotocol/graph-ts';
 import { createRegistryV1Entity } from './util/registryEvents';
 import { createMockDeposit1Call } from './util/vaultCalls';
-import { createMockAddStrategyV1Call } from './util/strategyCalls';
 import { createMockNewVaultEvent } from './util/vaultEvents';
 import { handleDepositWithAmount } from '../src/mappings/vaultMappings';
 import { CreateMockUSDCVault_1 } from './fixtures/CreateMockUSDCVault_1';

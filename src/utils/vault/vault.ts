@@ -11,7 +11,11 @@ import {
 
 import { Vault as VaultContract } from '../../../generated/Registry/Vault';
 import { Vault as VaultTemplate } from '../../../generated/templates';
-import { BIGINT_ZERO, DO_CREATE_VAULT_TEMPLATE } from '../constants';
+import {
+  BIGINT_ZERO,
+  DO_CREATE_VAULT_TEMPLATE,
+  ZERO_ADDRESS,
+} from '../constants';
 import { getOrCreateToken } from '../token';
 import * as depositLibrary from '../deposit';
 import * as withdrawalLibrary from '../withdrawal';
@@ -23,6 +27,7 @@ import * as tokenLibrary from '../token';
 import * as registryLibrary from '../registry/registry';
 import { updateVaultDayData } from './vault-day-data';
 import { booleanToString } from '../commons';
+import { getOrCreateHealthCheck } from '../healthCheck';
 
 const buildId = (vaultAddress: Address): string => {
   return vaultAddress.toHexString();
@@ -669,4 +674,37 @@ export function createCustomVaultIfNeeded(
     apiVersion,
     createTemplate
   );
+}
+
+export function handleUpdateHealthCheck(
+  vaultAddress: Address,
+  healthCheckAddress: Address,
+  transaction: Transaction
+): void {
+  let vault = Vault.load(vaultAddress.toHexString());
+  if (vault === null) {
+    log.warning(
+      'Failed to update vault health check, vault does not exist  Vault addr: {} Health check addr: {}  Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        healthCheckAddress.toHexString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    return;
+  }
+
+  if (healthCheckAddress.toHexString() === ZERO_ADDRESS) {
+    vault.healthCheck = null;
+    vault.save();
+
+    vaultUpdateLibrary.healthCheckUpdated(vault, transaction, null);
+  } else {
+    let healthCheck = getOrCreateHealthCheck(healthCheckAddress);
+
+    vault.healthCheck = healthCheck.id;
+    vault.save();
+
+    vaultUpdateLibrary.healthCheckUpdated(vault, transaction, healthCheck.id);
+  }
 }

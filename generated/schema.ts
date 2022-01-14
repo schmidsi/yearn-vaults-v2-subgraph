@@ -6,7 +6,6 @@ import {
   Value,
   ValueKind,
   store,
-  Address,
   Bytes,
   BigInt,
   BigDecimal
@@ -650,6 +649,23 @@ export class Vault extends Entity {
   set apiVersion(value: string) {
     this.set("apiVersion", Value.fromString(value));
   }
+
+  get healthCheck(): string | null {
+    let value = this.get("healthCheck");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set healthCheck(value: string | null) {
+    if (!value) {
+      this.unset("healthCheck");
+    } else {
+      this.set("healthCheck", Value.fromString(<string>value));
+    }
+  }
 }
 
 export class VaultUpdate extends Entity {
@@ -734,6 +750,23 @@ export class VaultUpdate extends Entity {
 
   set vault(value: string) {
     this.set("vault", Value.fromString(value));
+  }
+
+  get healthCheck(): string | null {
+    let value = this.get("healthCheck");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toString();
+    }
+  }
+
+  set healthCheck(value: string | null) {
+    if (!value) {
+      this.unset("healthCheck");
+    } else {
+      this.set("healthCheck", Value.fromString(<string>value));
+    }
   }
 
   get tokensDeposited(): BigInt {
@@ -850,6 +883,48 @@ export class VaultUpdate extends Entity {
     } else {
       this.set("rewards", Value.fromBytes(<Bytes>value));
     }
+  }
+}
+
+export class HealthCheck extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save HealthCheck entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        "Cannot save HealthCheck entity with non-string ID. " +
+          'Considering using .toHex() to convert the "id" to a string.'
+      );
+      store.set("HealthCheck", id.toString(), this);
+    }
+  }
+
+  static load(id: string): HealthCheck | null {
+    return changetype<HealthCheck | null>(store.get("HealthCheck", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get vaults(): Array<string> {
+    let value = this.get("vaults");
+    return value!.toStringArray();
+  }
+
+  set vaults(value: Array<string>) {
+    this.set("vaults", Value.fromStringArray(value));
   }
 }
 

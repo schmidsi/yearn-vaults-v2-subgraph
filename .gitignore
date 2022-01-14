@@ -111,3 +111,5 @@ analysis
 *.wasm
 out/
 tests/fixtureGenerator/config.json
+tests/.tools
+tests/.bin

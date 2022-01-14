@@ -1,0 +1,13 @@
+{
+  "startBlock": "18302800",
+  "network": "arbitrum",
+  "callHandlersEnabled": false,
+
+  "Registry": "0x??????????",
+  "registryV2Enabled": false,
+  "registryV2Address": "0x0000000000000000000000000000000000000000",
+  "registryV2StartBlock": "2147483647",
+
+  "manualVaults": [],
+  "vaultsWithPreregisteredStrategies": []
+}

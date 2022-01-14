@@ -17,6 +17,8 @@ schema.graphql
 subgraph.template.yaml
 subgraph.yaml
 *.wasm
+tests/.tools
+tests/.bin
 
 # JS
 node_modules
