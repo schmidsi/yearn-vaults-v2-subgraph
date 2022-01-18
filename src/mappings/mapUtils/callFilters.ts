@@ -21,7 +21,15 @@ export function shouldSkipDepositCall(
   }
 
   let vaultContract = VaultContract.bind(callTo);
-  if (featureFlags.depositEventsSupported(vaultContract.apiVersion())) {
+  let vaultApiVersion = vaultContract.try_apiVersion();
+  if (vaultApiVersion.reverted) {
+    log.info(
+      '[Vault Call Filter] Vault {} has triggered a call handler, but the contract does not implement .apiVersion(). Skipping',
+      [callFrom.toHexString()]
+    );
+    return true;
+  }
+  if (featureFlags.depositEventsSupported(vaultApiVersion.value)) {
     log.info(
       '[Vault Call Filter] Vault {} supports event-based deposits. Skipping call handler.',
       [callTo.toHexString()]
@@ -49,7 +57,15 @@ export function shouldSkipWithdrawCall(
   }
 
   let vaultContract = VaultContract.bind(callTo);
-  if (featureFlags.withdrawEventsSupported(vaultContract.apiVersion())) {
+  let vaultApiVersion = vaultContract.try_apiVersion();
+  if (vaultApiVersion.reverted) {
+    log.info(
+      '[Vault Call Filter] Vault {} has triggered a call handler, but the contract does not implement .apiVersion(). Skipping',
+      [callFrom.toHexString()]
+    );
+    return true;
+  }
+  if (featureFlags.withdrawEventsSupported(vaultApiVersion.value)) {
     log.info(
       '[Vault Call Filter] Vault {} supports event-based withdrawals. Skipping call handler.',
       [callTo.toHexString()]
