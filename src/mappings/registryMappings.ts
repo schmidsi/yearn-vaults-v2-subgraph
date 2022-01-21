@@ -41,7 +41,7 @@ export function handleNewReleaseInner(
     event.params.api_version,
     event.params.release_id,
     event,
-    ethTransaction,
+    ethTransaction
   );
 }
 

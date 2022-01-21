@@ -143,22 +143,28 @@ export function release(
   apiVersion: string,
   releaseId: BigInt,
   event: ethereum.Event,
-  transaction: Transaction,
+  transaction: Transaction
 ): Vault | null {
   let registryId = event.address.toHexString();
   let registry = Registry.load(registryId);
-  if (registry !== null ) {
-    log.info("[Vault] Registry {} found in vault releasing: {}", [registryId, vault.toHexString()]);
+  if (registry !== null) {
+    log.info('[Vault] Registry {} found in vault releasing: {}', [
+      registryId,
+      vault.toHexString(),
+    ]);
     return create(
       registry,
       transaction,
       vault,
       'Endorsed',
       apiVersion,
-      DO_CREATE_VAULT_TEMPLATE,
+      DO_CREATE_VAULT_TEMPLATE
     ) as Vault;
   } else {
-    log.warning("[Vault] Registry {} does not found in vault releasing: {}", [registryId, vault.toHexString()]);
+    log.warning('[Vault] Registry {} does not found in vault releasing: {}', [
+      registryId,
+      vault.toHexString(),
+    ]);
   }
   return null;
 }
