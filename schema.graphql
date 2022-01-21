@@ -61,6 +61,7 @@ type TokenFee @entity {
 enum VaultClassification {
   Endorsed
   Experimental
+  Released
 }
 
 ## TODO: Implement tracking the release pipeline from the Registry contract. Add these entities:

@@ -156,7 +156,7 @@ export function release(
       registry,
       transaction,
       vault,
-      'Endorsed',
+      'Released',
       apiVersion,
       DO_CREATE_VAULT_TEMPLATE
     ) as Vault;

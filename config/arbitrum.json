@@ -1,9 +1,9 @@
 {
-  "startBlock": "4835570",
+  "startBlock": "4841800",
   "network": "arbitrum-one",
   "callHandlersEnabled": false,
 
-  "Registry": "0x10F598F16C20902fBc74A56363AE526A7e3AfDdd",
+  "Registry": "0x3199437193625DCcD6F9C9e98BDf93582200Eb1f",
   "registryV2Enabled": false,
   "registryV2Address": "0x0000000000000000000000000000000000000000",
   "registryV2StartBlock": "9999999999",
