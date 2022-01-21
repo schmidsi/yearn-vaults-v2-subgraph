@@ -8,7 +8,6 @@ import {
   Vault,
   VaultUpdate,
 } from '../../../generated/schema';
-
 import { Vault as VaultContract } from '../../../generated/Registry/Vault';
 import { Vault as VaultTemplate } from '../../../generated/templates';
 import {
@@ -139,25 +138,35 @@ export function create(
   return vaultEntity;
 }
 
-// TODO: implement this
 export function release(
   vault: Address,
   apiVersion: string,
   releaseId: BigInt,
-  event: ethereum.Event
+  event: ethereum.Event,
+  transaction: Transaction
 ): Vault | null {
-  let id = vault.toHexString();
-  let entity = Vault.load(id);
-  if (entity !== null) {
-    // TODO: implement this
-    // entity.status = 'Released'
-    // entity.apiVersion = apiVersion
-    // entity.deploymentId = deploymentId
-    // entity.blockNumber = event.block.number
-    // entity.timestamp = getTimestampInMillis(event)
-    // entity.save()
+  let registryId = event.address.toHexString();
+  let registry = Registry.load(registryId);
+  if (registry !== null) {
+    log.info('[Vault] Registry {} found in vault releasing: {}', [
+      registryId,
+      vault.toHexString(),
+    ]);
+    return create(
+      registry,
+      transaction,
+      vault,
+      'Released',
+      apiVersion,
+      DO_CREATE_VAULT_TEMPLATE
+    ) as Vault;
+  } else {
+    log.warning('[Vault] Registry {} does not found in vault releasing: {}', [
+      registryId,
+      vault.toHexString(),
+    ]);
   }
-  return entity;
+  return null;
 }
 
 export function tag(vault: Address, tag: string): Vault | null {

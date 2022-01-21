@@ -13,12 +13,16 @@ import {
   FTM_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS,
   FTM_MAINNET_USDC_ORACLE_ADDRESS,
   FTM_MAINNET_CALCULATIONS_SPOOKY_SWAP_ADDRESS,
+  ARB_MAINNET_NETWORK,
+  ARB_MAINNET_USDC_ORACLE_ADDRESS,
+  ARB_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS,
 } from '../constants';
 
 function getSushiSwapCalculationsAddress(network: string): Address {
   let map = new Map<string, string>();
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS);
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS);
+  map.set(ARB_MAINNET_NETWORK, ARB_MAINNET_CALCULATIONS_SUSHI_SWAP_ADDRESS);
   let address = changetype<Address>(Address.fromHexString(map.get(network)));
   log.info('Getting SushiSwap Calculations address {} in {}.', [
     address.toHexString(),
@@ -31,6 +35,7 @@ function getOracleCalculatorAddress(network: string): Address {
   let map = new Map<string, string>();
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_USDC_ORACLE_ADDRESS);
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_USDC_ORACLE_ADDRESS);
+  map.set(ARB_MAINNET_NETWORK, ARB_MAINNET_USDC_ORACLE_ADDRESS);
   let address = changetype<Address>(Address.fromHexString(map.get(network)));
   log.info('Getting Oracle Calculations address {} in {}.', [
     address.toHexString(),
