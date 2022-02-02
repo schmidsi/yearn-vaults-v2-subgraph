@@ -1,8 +1,4 @@
 import {
-  AddStrategy1Call as AddStrategyV2Call,
-  AddStrategyCall as AddStrategyV1Call,
-} from '../../generated/Registry/Vault';
-import {
   BigInt,
   ethereum,
   log,
@@ -14,9 +10,11 @@ import { defaults } from '../default';
 import { newMockEvent } from 'matchstick-as';
 import {
   Harvested as HarvestedEvent,
-  Cloned as ClonedEvent,
   SetHealthCheckCall,
   SetDoHealthCheckCall,
+  SetHealthCheck as SetHealthCheckEvent,
+  SetDoHealthCheck as SetDoHealthCheckEvent,
+  Cloned as ClonedEvent,
 } from '../../generated/templates/Vault/Strategy';
 
 export function createMockHarvestedEvent(
@@ -65,4 +63,56 @@ export function createMockHarvestedEvent(
   harvestedEvent.parameters.push(debtOutstandingParam);
 
   return harvestedEvent;
+}
+
+export function createMockSetHealthCheckEvent(
+  strategyAddress: string,
+  healthCheckAddress: string
+): SetHealthCheckEvent {
+  let mockEvent = newMockEvent();
+
+  let setHealthCheckEvent = new SetHealthCheckEvent(
+    Address.fromString(strategyAddress),
+    mockEvent.logIndex,
+    mockEvent.transactionLogIndex,
+    mockEvent.logType,
+    mockEvent.block,
+    mockEvent.transaction,
+    mockEvent.parameters
+  );
+
+  setHealthCheckEvent.parameters = new Array();
+  let addressParam = new ethereum.EventParam(
+    'healthCheck',
+    ethereum.Value.fromAddress(Address.fromString(healthCheckAddress))
+  );
+  setHealthCheckEvent.parameters.push(addressParam);
+
+  return setHealthCheckEvent;
+}
+
+export function createMockSetDoHealthCheckEvent(
+  strategyAddress: string,
+  doHealthCheck: boolean
+): SetDoHealthCheckEvent {
+  let mockEvent = newMockEvent();
+
+  let setHealthCheckEvent = new SetDoHealthCheckEvent(
+    Address.fromString(strategyAddress),
+    mockEvent.logIndex,
+    mockEvent.transactionLogIndex,
+    mockEvent.logType,
+    mockEvent.block,
+    mockEvent.transaction,
+    mockEvent.parameters
+  );
+
+  setHealthCheckEvent.parameters = new Array();
+  let doHealthCheckParam = new ethereum.EventParam(
+    'doHealthCheck',
+    ethereum.Value.fromBoolean(doHealthCheck)
+  );
+  setHealthCheckEvent.parameters.push(doHealthCheckParam);
+
+  return setHealthCheckEvent;
 }

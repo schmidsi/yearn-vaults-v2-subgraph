@@ -9,33 +9,30 @@ import {
 } from '@graphprotocol/graph-ts';
 import { createRegistryV1Entity } from './util/registryEvents';
 import {
-  createMockDeposit1Call,
-  createMockWithdraw1Call,
-} from './util/vaultCalls';
-import { createMockAddStrategyV1Call } from './util/strategyCalls';
-import {
+  createMockAddStrategyV1Event,
   createMockNewVaultEvent,
   createMockStrategyReported_v3_0_v3_1_Event,
 } from './util/vaultEvents';
-import { createMockHarvestedEvent } from './util/strategyEvents';
 import {
-  handleDeposit,
-  handleWithdrawWithShares,
-  handleAddStrategy,
-  handleWithdraw,
+  createMockHarvestedEvent,
+  createMockSetDoHealthCheckEvent,
+  createMockSetHealthCheckEvent,
+} from './util/strategyEvents';
+import {
   handleStrategyReported_v0_3_0_v0_3_1,
+  handleStrategyAddedV1,
 } from '../src/mappings/vaultMappings';
-import { handleHarvested } from '../src/mappings/strategyMappings';
+import {
+  handleHarvested,
+  handleSetHealthCheckEvent,
+  handleSetDoHealthCheckEvent,
+} from '../src/mappings/strategyMappings';
 
 import { CreateMockUSDCVault_1 } from './fixtures/CreateMockUSDCVault_1';
 import { AddStrategyToUSDCVault_2 } from './fixtures/AddStrategyToUSDCVault_2';
 import { HarvestStrategy_4 } from './fixtures/HarvestStrategy_4';
 import { handleNewVaultInner } from '../src/mappings/registryMappings';
-import {
-  Vault as VaultSchema,
-  Deposit as DepositSchema,
-  Strategy as StrategySchema,
-} from '../generated/schema';
+import { Strategy as StrategySchema } from '../generated/schema';
 import { buildIdFromEvent } from '../src/utils/commons';
 
 let registry_address = Address.fromString(
@@ -65,14 +62,15 @@ test('Can add a strategy to a vault using handleAddStrategyV1 (call)', () => {
   let debtLimit = '9500';
   let rateLimit = '2000000000000';
   let performanceFee = '1000';
-  let mockCall = createMockAddStrategyV1Call(
+  let mockAddStrategyEvent = createMockAddStrategyV1Event(
     Address.fromString(strategyAddress),
     Address.fromString(vaultAddress),
     debtLimit,
     rateLimit,
     performanceFee
   );
-  handleAddStrategy(mockCall);
+
+  handleStrategyAddedV1(mockAddStrategyEvent);
 
   let strategy = StrategySchema.load(strategyAddress);
   assert.assertNotNull(strategy);
@@ -178,6 +176,47 @@ test('StrategyReported_v0_3_0_v0_3_1 (event)', () => {
     'debtAdded',
     debtAdded
   );
+});
+
+test('SetHealthCheck (event)', () => {
+  // This event doesn't actually happen at this block height for this strategy,
+  // but fortunately we don't need to query the on-chain state to test this event handler.
+  let strategyAddress = HarvestStrategy_4.StrategyAddress;
+  let healthCheckAddress = '0x000000000000000000000000000000000000dead';
+  let setHealthCheckEvent = createMockSetHealthCheckEvent(
+    strategyAddress,
+    healthCheckAddress
+  );
+
+  handleSetHealthCheckEvent(setHealthCheckEvent);
+
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'healthCheck',
+    healthCheckAddress
+  );
+});
+
+test('SetDoHealthCheck (event)', () => {
+  // This event doesn't actually happen at this block height for this strategy,
+  // but fortunately we don't need to query the on-chain state to test this event handler.
+  let strategyAddress = HarvestStrategy_4.StrategyAddress;
+
+  let enableHealthCheckEvent = createMockSetDoHealthCheckEvent(
+    strategyAddress,
+    true
+  );
+  handleSetDoHealthCheckEvent(enableHealthCheckEvent);
+
+  assert.fieldEquals('Strategy', strategyAddress, 'doHealthCheck', 'true');
+
+  let disableHealthCheckEvent = createMockSetDoHealthCheckEvent(
+    strategyAddress,
+    false
+  );
+  handleSetDoHealthCheckEvent(disableHealthCheckEvent);
+  assert.fieldEquals('Strategy', strategyAddress, 'doHealthCheck', 'false');
 });
 
 clearStore();

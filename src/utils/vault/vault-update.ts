@@ -1,5 +1,10 @@
 import { Address, BigInt, log } from '@graphprotocol/graph-ts';
-import { Transaction, Vault, VaultUpdate } from '../../../generated/schema';
+import {
+  HealthCheck,
+  Transaction,
+  Vault,
+  VaultUpdate,
+} from '../../../generated/schema';
 import { BIGINT_ZERO } from '../constants';
 
 export function buildIdFromVaultTxHashAndIndex(
@@ -37,7 +42,8 @@ function createVaultUpdate(
   performanceFees: BigInt,
   balancePosition: BigInt,
   totalAssets: BigInt,
-  rewards: Address | null = null
+  rewards: Address | null = null,
+  healthCheck: string | null = null
 ): VaultUpdate {
   log.debug('[VaultUpdate] Creating vault update with id {}', [id]);
   let vaultUpdate = new VaultUpdate(id);
@@ -45,6 +51,7 @@ function createVaultUpdate(
   vaultUpdate.blockNumber = transaction.blockNumber;
   vaultUpdate.transaction = transaction.id;
   vaultUpdate.vault = vault.id;
+  vaultUpdate.healthCheck = healthCheck;
   // Balances & Shares
   vaultUpdate.tokensDeposited = tokensDeposited;
   vaultUpdate.tokensWithdrawn = tokensWithdrawn;
@@ -288,7 +295,38 @@ export function rewardsUpdated(
     BIGINT_ZERO,
     balancePosition,
     totalAssets,
-    rewards
+    rewards,
+    latestVaultUpdate.healthCheck
   );
   return newVaultUpdate;
+}
+
+export function healthCheckUpdated(
+  vault: Vault,
+  transaction: Transaction,
+  healthCheck: string | null
+): void {
+  let vaultUpdateId = buildIdFromVaultAndTransaction(vault, transaction);
+  let latestVaultUpdate: VaultUpdate | null;
+  if (vault.latestUpdate !== null) {
+    latestVaultUpdate = VaultUpdate.load(vault.latestUpdate!);
+  }
+
+  let newVaultUpdate = createVaultUpdate(
+    vaultUpdateId,
+    vault,
+    transaction,
+    BIGINT_ZERO, // TokensDeposited
+    BIGINT_ZERO, // TokensWithdrawn
+    BIGINT_ZERO, // SharesMinted
+    BIGINT_ZERO, // SharesBurnt
+    latestVaultUpdate!.pricePerShare,
+    latestVaultUpdate!.totalFees,
+    BIGINT_ZERO, // management fees
+    BIGINT_ZERO, // performance fees
+    latestVaultUpdate!.balancePosition,
+    latestVaultUpdate!.balanceTokens,
+    null,
+    healthCheck
+  );
 }

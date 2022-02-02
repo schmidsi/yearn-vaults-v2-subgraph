@@ -66,6 +66,7 @@ export function createAndGet(
     strategy.doHealthCheck = tryDoHealthCheck.reverted
       ? false
       : tryDoHealthCheck.value;
+
     strategy.save();
     StrategyTemplate.create(strategyAddress);
   }

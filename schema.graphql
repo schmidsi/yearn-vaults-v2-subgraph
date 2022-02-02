@@ -61,6 +61,7 @@ type TokenFee @entity {
 enum VaultClassification {
   Endorsed
   Experimental
+  Released
 }
 
 ## TODO: Implement tracking the release pipeline from the Registry contract. Add these entities:
@@ -159,6 +160,8 @@ type Vault @entity {
   activation: BigInt!
   "The API version."
   apiVersion: String!
+  "The vault's health check contract."
+  healthCheck: HealthCheck
 }
 
 type VaultUpdate @entity {
@@ -172,6 +175,8 @@ type VaultUpdate @entity {
   transaction: Transaction!
   "Vault this update is for"
   vault: Vault!
+  "The vault's health check contract."
+  healthCheck: HealthCheck
 
   ### BALANCES AND SHARES
 
@@ -203,6 +208,13 @@ type VaultUpdate @entity {
   performanceFees: BigInt!
   "The address where management fees are paid to"
   rewards: Bytes
+}
+
+type HealthCheck @entity {
+  "Health Check Address"
+  id: ID!
+  "Vaults that use this health check contract."
+  vaults: [Vault!]! @derivedFrom(field: "healthCheck")
 }
 
 type Account @entity {
