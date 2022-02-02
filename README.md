@@ -15,7 +15,8 @@ To run tests;
 
 1. Make sure your installed version of graph is newer than 0.22.0 using `graph --version`
 2. If you don't have Postgres installed, install it; https://github.com/LimeChain/matchstick#quick-start-
-3. Run `graph test`. Graph CLI should download and install a binary for the testing framework, [Matchstick](https://github.com/LimeChain/matchstick). Once the testing framework is set up, the tests will be run.
+3. Run `yarn prepare:mainnet` or `yarn prepare:fantom` to prepare `subgraph.yaml`.
+4. Run `graph test`. Graph CLI should download and install a binary for the testing framework, [Matchstick](https://github.com/LimeChain/matchstick). Once the testing framework is set up, the tests will be run.
    If this does not work, you may need to compile Matchstick locally and run tests using `$matchstick_build_dir/matchstick` instead.
 
 ## Network Configuration
