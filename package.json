@@ -27,7 +27,8 @@
     "lint:fix": "sort-package-json && prettier --write ./**",
     "postinstall": "husky install",
     "prepublishOnly": "pinst --disable",
-    "postpublish": "pinst --enable"
+    "postpublish": "pinst --enable",
+    "clean": "rm -rf ./build && rm -rf ./tests/.bin"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.23.0",

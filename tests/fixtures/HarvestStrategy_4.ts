@@ -14,6 +14,8 @@ export namespace HarvestStrategy_4 {
   export const WantTokenAddress = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
   export const Block = '11685275';
   export const StrategyAddress = '0x4d7d4485fd600c61d840ccbec328bfd76a050f87';
+  export const PricePerShare = '999953';
+  export const TreasuryAddress = '0x93a62da5a14c80f265dabc077fcee437b1a0efde';
   export function mockChainState(): void {
     createMockedFunction(
       Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
@@ -178,5 +180,159 @@ export namespace HarvestStrategy_4 {
       'name',
       'name():(string)'
     ).returns([ethereum.Value.fromString('USD Coin')]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'decimals',
+      'decimals():(uint8)'
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('6'))]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'decimals',
+      'decimals():(uint256)'
+    ).returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('6'))]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'balanceOf',
+      'balanceOf(address):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9')
+        ),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'balanceOf',
+      'balanceOf(address):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0x4d7d4485fd600c61d840ccbec328bfd76a050f87')
+        ),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('0'))]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'balanceOf',
+      'balanceOf(address):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0x93a62da5a14c80f265dabc077fcee437b1a0efde')
+        ),
+      ])
+      .returns([
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('28243466')),
+      ]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'symbol',
+      'symbol():(string)'
+    ).returns([ethereum.Value.fromString('yvUSDC')]);
+
+    createMockedFunction(
+      Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+      'name',
+      'name():(string)'
+    ).returns([ethereum.Value.fromString('USDC yVault')]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('33043378')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('3304410')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('16569793')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'try_getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('33043378')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'try_getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('3304410')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'try_getNormalizedValueUsdc',
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('16569793')),
+      ])
+      .returns([ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1'))]);
+
+    createMockedFunction(
+      Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
+      'getPriceUsdcRecommended',
+      'getPriceUsdcRecommended(address):(uint256)'
+    )
+      .withArgs([
+        ethereum.Value.fromAddress(
+          Address.fromString('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
+        ),
+      ])
+      .returns([
+        ethereum.Value.fromUnsignedBigInt(BigInt.fromString('1000000')),
+      ]);
   }
 }

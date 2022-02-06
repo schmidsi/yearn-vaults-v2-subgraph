@@ -1,4 +1,9 @@
 import { assert } from 'matchstick-as/assembly/index';
+import {
+  getDayIDFromIndex,
+  getDayIndexFromTimestamp,
+} from '../../src/utils/vault/vault-day-data';
+import { defaults } from '../default';
 
 /* 
 This function is used to verify subgraph state transitions that are triggered by withdrawals.
@@ -60,12 +65,15 @@ export function validateWithdrawalStateTransition(
   assert.fieldEquals(
     'VaultUpdate',
     vaultUpdateId,
-    'pricePerShare',
+    'currentPricePerShare',
     expectedPricePerShare
   );
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'totalFees', '0');
-  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'managementFees', '0');
-  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'performanceFees', '0');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'newManagementFee', 'null');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'newPerformanceFee', 'null');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'newHealthCheck', 'null');
+  assert.fieldEquals('VaultUpdate', vaultUpdateId, 'newRewards', 'null');
+
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'returnsGenerated', '0');
 
   // todo: get newOrder from transaction
@@ -110,5 +118,24 @@ export function validateWithdrawalStateTransition(
     withdrawlId,
     'sharesBurnt',
     expectedSharesBurned
+  );
+
+  // Verify VaultDayData
+  let dayId = getDayIndexFromTimestamp(defaults.bigInt);
+  let vaultDayId = getDayIDFromIndex(vault, dayId);
+  assert.fieldEquals('VaultDayData', vaultDayId, 'id', vaultDayId);
+  assert.fieldEquals('VaultDayData', vaultDayId, 'totalReturnsGenerated', '0');
+  assert.fieldEquals('VaultDayData', vaultDayId, 'dayReturnsGenerated', '0');
+  assert.fieldEquals(
+    'VaultDayData',
+    vaultDayId,
+    'withdrawn',
+    expectedSharesBurned.toString()
+  );
+  assert.fieldEquals(
+    'VaultDayData',
+    vaultDayId,
+    'pricePerShare',
+    expectedPricePerShare.toString()
   );
 }

@@ -129,7 +129,7 @@ export function handleStrategyReported_v0_3_0_v0_3_1(
       event,
       'yvWBTCVault_StrategyReportedEvent'
     );
-    strategyLibrary.createReport(
+    let strategyReport = strategyLibrary.createReport(
       ethTransaction,
       event.params.strategy.toHexString(),
       event.params.gain,
@@ -151,9 +151,9 @@ export function handleStrategyReported_v0_3_0_v0_3_1(
     let vaultContract = VaultContract.bind(vaultContractAddress);
     vaultLibrary.strategyReported(
       ethTransaction,
+      strategyReport!,
       vaultContract,
-      vaultContractAddress,
-      vaultContract.pricePerShare()
+      vaultContractAddress
     );
   }
 }
@@ -181,7 +181,7 @@ export function handleStrategyReported(event: StrategyReportedEvent): void {
       'yvWBTCVault_StrategyReportedEvent'
     );
 
-    strategyLibrary.createReport(
+    let strategyReport = strategyLibrary.createReport(
       ethTransaction,
       event.params.strategy.toHexString(),
       event.params.gain,
@@ -203,9 +203,9 @@ export function handleStrategyReported(event: StrategyReportedEvent): void {
     let vaultContract = VaultContract.bind(vaultContractAddress);
     vaultLibrary.strategyReported(
       ethTransaction,
+      strategyReport!,
       vaultContract,
-      vaultContractAddress,
-      vaultContract.pricePerShare()
+      vaultContractAddress
     );
   }
 }

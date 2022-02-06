@@ -6,6 +6,9 @@ import {
   Withdraw as WithdrawEvent,
   StrategyAdded as StrategyAddedV1Event,
   StrategyAdded1 as StrategyAddedV2Event,
+  UpdatePerformanceFee,
+  UpdateManagementFee,
+  UpdateRewards,
 } from '../../generated/Registry/Vault';
 import {
   BigInt,
@@ -17,6 +20,8 @@ import {
 } from '@graphprotocol/graph-ts';
 import { newMockEvent } from 'matchstick-as';
 import { defaults } from '../default';
+
+// There ought to be a way to automatically generate this code.
 
 export function createMockNewVaultEvent(
   token: Address, // @ts-ignore
@@ -330,4 +335,103 @@ export function createMockAddStrategyV2Event(
   );
 
   return addStrategyV2Event;
+}
+
+export function createMockUpdatePerformanceFeeEvent(
+  vaultAddress: string,
+  performanceFee: string
+): UpdatePerformanceFee {
+  let mockTransaction = new ethereum.Transaction(
+    defaults.address,
+    defaults.bigInt,
+    defaults.address,
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.addressBytes
+  );
+
+  let performanceFeeParam = new ethereum.EventParam(
+    'performanceFee',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(performanceFee))
+  );
+
+  let mockEvent = new UpdatePerformanceFee(
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.string,
+    defaults.block,
+    mockTransaction,
+    [performanceFeeParam]
+  );
+
+  return mockEvent;
+}
+
+export function createMockUpdateManagementFeeEvent(
+  vaultAddress: string,
+  managementFee: string
+): UpdateManagementFee {
+  let mockTransaction = new ethereum.Transaction(
+    defaults.address,
+    defaults.bigInt,
+    defaults.address,
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.addressBytes
+  );
+
+  let managementFeeParam = new ethereum.EventParam(
+    'managementFee',
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(managementFee))
+  );
+
+  let mockEvent = new UpdateManagementFee(
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.string,
+    defaults.block,
+    mockTransaction,
+    [managementFeeParam]
+  );
+
+  return mockEvent;
+}
+
+export function createMockUpdateRewardsEvent(
+  vaultAddress: string,
+  newRewardsAddress: string
+): UpdateRewards {
+  let mockTransaction = new ethereum.Transaction(
+    defaults.address,
+    defaults.bigInt,
+    defaults.address,
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.addressBytes
+  );
+
+  let rewardsParam = new ethereum.EventParam(
+    'rewards',
+    ethereum.Value.fromAddress(Address.fromString(newRewardsAddress))
+  );
+
+  let mockEvent = new UpdateRewards(
+    Address.fromString(vaultAddress),
+    defaults.bigInt,
+    defaults.bigInt,
+    defaults.string,
+    defaults.block,
+    mockTransaction,
+    [rewardsParam]
+  );
+
+  return mockEvent;
 }

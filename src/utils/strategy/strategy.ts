@@ -125,15 +125,20 @@ export function createReport(
           latestReport
         );
       }
-      return latestReport;
     } else {
       log.info(
         '[Strategy] Report result NOT created. Only one report created {} for strategy {}. TxHash: {}',
         [latestReport.id, strategyId, txHash]
       );
     }
+    return latestReport;
+  } else {
+    log.warning(
+      '[Strategy] Failed to load strategy {} while handling StrategyReport',
+      [strategyId]
+    );
+    return null;
   }
-  return null;
 }
 
 export function harvest(

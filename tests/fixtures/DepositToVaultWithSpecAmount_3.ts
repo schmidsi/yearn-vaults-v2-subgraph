@@ -183,7 +183,7 @@ export namespace DepositToVaultWithSpecAmount_3 {
     createMockedFunction(
       Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
       'getNormalizedValueUsdc',
-      'getNormalizedValueUsdc(address,uint128):(uint256)'
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
     )
       .withArgs([
         ethereum.Value.fromAddress(
@@ -196,7 +196,7 @@ export namespace DepositToVaultWithSpecAmount_3 {
     createMockedFunction(
       Address.fromString('0x83d95e0d5f402511db06817aff3f9ea88224b030'),
       'try_getNormalizedValueUsdc',
-      'getNormalizedValueUsdc(address,uint128):(uint256)'
+      'getNormalizedValueUsdc(address,uint256):(uint256)'
     )
       .withArgs([
         ethereum.Value.fromAddress(

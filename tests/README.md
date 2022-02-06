@@ -1,6 +1,6 @@
-# Yearn Vaults Subchart Tests
+# Yearn Vaults Subgraph Tests
 
-Testing the subchart is a complicated endeavour given the amount of statefulness in subgraphs and lack of testing tools in the space.
+Testing the subgraph is a complicated endeavour given the amount of statefulness in subgraphs and lack of testing tools in the space.
 
 The goal is to test the various mapping handlers to make sure the state mutations they emit are valid and accurate. Some mapping handlers may perform differently when they are tested atomically vs. being tested against live state, so please be thoughtful about the kinds of tests you create.
 

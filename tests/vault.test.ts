@@ -17,6 +17,9 @@ import {
   createMockAddStrategyV1Event,
   createMockDepositEvent,
   createMockNewVaultEvent,
+  createMockUpdateManagementFeeEvent,
+  createMockUpdatePerformanceFeeEvent,
+  createMockUpdateRewardsEvent,
   createMockWithdrawEvent,
 } from './util/vaultEvents';
 import {
@@ -26,6 +29,9 @@ import {
   handleStrategyAddedV2,
   handleWithdrawEvent,
   handleDepositEvent,
+  handleUpdatePerformanceFee,
+  handleUpdateManagementFee,
+  handleUpdateRewards,
 } from '../src/mappings/vaultMappings';
 import { CreateMockUSDCVault_1 } from './fixtures/CreateMockUSDCVault_1';
 import { AddStrategyToUSDCVault_2 } from './fixtures/AddStrategyToUSDCVault_2';
@@ -36,6 +42,7 @@ import {
   Vault as VaultSchema,
   Deposit as DepositSchema,
   Strategy as StrategySchema,
+  VaultUpdate as VaultUpdateSchema,
 } from '../generated/schema';
 import { validateDepositStateTransition } from './assertations/vaultDeposit';
 import { validateWithdrawalStateTransition } from './assertations/vaultWithdraw';
@@ -323,9 +330,172 @@ test('Can add a strategy to a vault using handleAddStrategyV1 (event)', () => {
   assert.fieldEquals('Strategy', strategyAddress, 'rateLimit', rateLimit);
   assert.fieldEquals('Strategy', strategyAddress, 'minDebtPerHarvest', '0');
   assert.fieldEquals('Strategy', strategyAddress, 'maxDebtPerHarvest', '0');
+});
 
-  assert.fieldEquals('Strategy', strategyAddress, 'healthCheck', 'null');
-  assert.fieldEquals('Strategy', strategyAddress, 'doHealthCheck', 'false');
+test('Test UpdatePerformanceFeeEvent', () => {
+  // setup environment from scratch
+  clearStore();
+  CreateMockUSDCVault_1.mockChainState();
+  let vaultAddress = CreateMockUSDCVault_1.VaultAddress;
+  let wantTokenAddress = CreateMockUSDCVault_1.WantTokenAddress;
+  let apiVersion = '0.3.0';
+
+  let mockEvent = createMockNewVaultEvent(
+    Address.fromString(wantTokenAddress),
+    1,
+    Address.fromString(vaultAddress),
+    apiVersion
+  );
+  handleNewVaultInner(registry_address, mockEvent);
+
+  // By default, performance fee is 1000 bps. Let's override it for this test.
+  let performanceFee = '500';
+  createMockedFunction(
+    Address.fromString('0x5f18c75abdae578b483e5f43f12a39cf75b973a9'),
+    'performanceFee',
+    'performanceFee():(uint256)'
+  ).returns([
+    // @ts-ignore
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(performanceFee)),
+  ]);
+  // end of environment setup
+
+  let mockPerfFeeUpdate = createMockUpdatePerformanceFeeEvent(
+    vaultAddress,
+    performanceFee
+  );
+  handleUpdatePerformanceFee(mockPerfFeeUpdate);
+
+  assert.fieldEquals(
+    'Vault',
+    vaultAddress,
+    'performanceFeeBps',
+    performanceFee
+  );
+  // grab latest update and make sure it has the correct fee
+  let vaultEntity = VaultSchema.load(vaultAddress!);
+  assert.assertNotNull(vaultEntity);
+  let latestUpdateId = vaultEntity!.latestUpdate;
+  assert.assertNotNull(latestUpdateId);
+
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdateId!,
+    'newPerformanceFee',
+    performanceFee
+  );
+  // make management fee isn't impacted
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdateId!,
+    'newManagementFee',
+    'null'
+  );
+});
+
+test('Test UpdateManagementFeeEvent', () => {
+  // setup environment from scratch
+  clearStore();
+  CreateMockUSDCVault_1.mockChainState();
+  let vaultAddress = CreateMockUSDCVault_1.VaultAddress;
+  let wantTokenAddress = CreateMockUSDCVault_1.WantTokenAddress;
+  let apiVersion = '0.3.0';
+
+  let mockEvent = createMockNewVaultEvent(
+    Address.fromString(wantTokenAddress),
+    1,
+    Address.fromString(vaultAddress),
+    apiVersion
+  );
+  handleNewVaultInner(registry_address, mockEvent);
+
+  // By default, management fee is 200 bps. Let's override it for this test.
+  let managementFee = '100';
+  createMockedFunction(
+    Address.fromString(vaultAddress),
+    'managementFee',
+    'managementFee():(uint256)'
+  ).returns([
+    // @ts-ignore
+    ethereum.Value.fromUnsignedBigInt(BigInt.fromString(managementFee)),
+  ]);
+  // end of environment setup
+
+  let mockManagementFeeUpdate = createMockUpdateManagementFeeEvent(
+    vaultAddress,
+    managementFee
+  );
+  handleUpdateManagementFee(mockManagementFeeUpdate);
+
+  assert.fieldEquals('Vault', vaultAddress, 'managementFeeBps', managementFee);
+  // grab latest update and make sure it has the correct fee
+  let vaultEntity = VaultSchema.load(vaultAddress!);
+  assert.assertNotNull(vaultEntity);
+  let latestUpdateId = vaultEntity!.latestUpdate;
+  assert.assertNotNull(latestUpdateId);
+
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdateId!,
+    'newManagementFee',
+    managementFee
+  );
+  // make perf fee isn't impacted
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdateId!,
+    'newPerformanceFee',
+    'null'
+  );
+});
+
+test('Test UpdateRewardsEvent', () => {
+  // setup environment from scratch
+  clearStore();
+  CreateMockUSDCVault_1.mockChainState();
+  let vaultAddress = CreateMockUSDCVault_1.VaultAddress;
+  let wantTokenAddress = CreateMockUSDCVault_1.WantTokenAddress;
+  let apiVersion = '0.3.0';
+
+  let mockEvent = createMockNewVaultEvent(
+    Address.fromString(wantTokenAddress),
+    1,
+    Address.fromString(vaultAddress),
+    apiVersion
+  );
+  handleNewVaultInner(registry_address, mockEvent);
+
+  // By default, the rewards address is already set. Must override it for testing
+  let newRewardsAddress = '0x000000000000000000000000000000000000dead';
+  createMockedFunction(
+    Address.fromString(vaultAddress),
+    'rewards',
+    'rewards():(address)'
+  ).returns([
+    // @ts-ignore
+    ethereum.Value.fromAddress(Address.fromString(newRewardsAddress)),
+  ]);
+  // end of environment setup
+
+  let mockRewardsUpdate = createMockUpdateRewardsEvent(
+    vaultAddress,
+    newRewardsAddress
+  );
+  handleUpdateRewards(mockRewardsUpdate);
+
+  assert.fieldEquals('Vault', vaultAddress, 'rewards', newRewardsAddress);
+  // grab latest update and make sure it has the correct fee
+  let vaultEntity = VaultSchema.load(vaultAddress!);
+  assert.assertNotNull(vaultEntity);
+  let latestUpdateId = vaultEntity!.latestUpdate;
+  assert.assertNotNull(latestUpdateId);
+
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdateId!,
+    'newRewards',
+    newRewardsAddress
+  );
 });
 
 clearStore();

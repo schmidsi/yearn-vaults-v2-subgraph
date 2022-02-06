@@ -29,6 +29,7 @@ let registry_address = Address.fromString(
 
 test('https://github.com/yearn/yearn-vaults-v2-subgraph/issues/99', () => {
   // set up the chain state for the test
+  clearStore();
   let registry = createRegistryV1Entity(registry_address);
   CreateMockUSDCVault_1.mockChainState();
   let vaultAddress = CreateMockUSDCVault_1.VaultAddress;

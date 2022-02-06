@@ -4,6 +4,7 @@ import {
   AccountVaultPositionUpdate,
   Registry,
   Strategy,
+  StrategyReport,
   Transaction,
   Vault,
   VaultUpdate,
@@ -202,7 +203,6 @@ export function deposit(
   );
   let vaultContract = VaultContract.bind(vaultAddress);
   let account = accountLibrary.getOrCreate(receiver);
-  let pricePerShare = vaultContract.pricePerShare();
   let vault = getOrCreate(vaultAddress, transaction, DO_CREATE_VAULT_TEMPLATE);
 
   accountVaultPositionLibrary.deposit(
@@ -231,7 +231,6 @@ export function deposit(
       transaction,
       depositedAmount,
       sharesMinted,
-      pricePerShare,
       balancePosition,
       totalAssets
     );
@@ -241,22 +240,10 @@ export function deposit(
       transaction,
       depositedAmount,
       sharesMinted,
-      pricePerShare,
       balancePosition,
       totalAssets
     );
   }
-
-  updateVaultDayData(
-    vault,
-    vaultContract.token(),
-    timestamp,
-    pricePerShare,
-    depositedAmount,
-    BIGINT_ZERO,
-    vaultUpdate.returnsGenerated,
-    vaultContract.decimals()
-  );
 }
 
 /* Calculates the amount of tokens deposited via totalAssets/totalSupply arithmetic. */
@@ -297,7 +284,6 @@ export function withdraw(
   timestamp: BigInt
 ): void {
   let vaultContract = VaultContract.bind(vaultAddress);
-  let pricePerShare = vaultContract.pricePerShare();
   let account = accountLibrary.getOrCreate(from);
   let balancePosition = getBalancePosition(vaultContract);
   let vault = getOrCreate(vaultAddress, transaction, DO_CREATE_VAULT_TEMPLATE);
@@ -390,26 +376,13 @@ export function withdraw(
     let latestVaultUpdate = VaultUpdate.load(vault.latestUpdate!);
     // This scenario where latestVaultUpdate === null shouldn't happen. One vault update should have created when user deposited the tokens.
     if (latestVaultUpdate !== null) {
-      vaultUpdateLibrary.withdraw(
+      let vaultUpdate = vaultUpdateLibrary.withdraw(
         vault,
-        latestVaultUpdate as VaultUpdate,
-        pricePerShare,
         withdrawnAmount,
         sharesBurnt,
         transaction,
         balancePosition,
         getTotalAssets(vaultContract)
-      );
-
-      updateVaultDayData(
-        vault,
-        vaultContract.token(),
-        timestamp,
-        pricePerShare,
-        BIGINT_ZERO,
-        withdrawnAmount,
-        latestVaultUpdate.returnsGenerated,
-        vaultContract.decimals()
       );
     }
   } else {
@@ -460,31 +433,33 @@ export function transfer(
 
 export function strategyReported(
   transaction: Transaction,
+  strategyReport: StrategyReport,
   vaultContract: VaultContract,
-  vaultAddress: Address,
-  pricePerShare: BigInt
+  vaultAddress: Address
 ): void {
   log.info('[Vault] Strategy reported for vault {} at TX ', [
     vaultAddress.toHexString(),
     transaction.hash.toHexString(),
   ]);
   let vault = getOrCreate(vaultAddress, transaction, DO_CREATE_VAULT_TEMPLATE);
-  if (vault.latestUpdate !== null) {
-    let latestVaultUpdate = VaultUpdate.load(vault.latestUpdate!);
 
-    let balancePosition = getBalancePosition(vaultContract);
-    // The latest vault update should exist
-    if (latestVaultUpdate !== null) {
-      vaultUpdateLibrary.strategyReported(
-        vault,
-        latestVaultUpdate as VaultUpdate,
-        transaction,
-        pricePerShare,
-        balancePosition,
-        getTotalAssets(vaultContract)
-      );
-    }
+  if (!vault.latestUpdate) {
+    log.warning(
+      '[Vault] Strategy reporting despite no previous Vault updates: {} Either this is a unit test, or a a vault/strategy was not set up correctly.',
+      [transaction.id.toString()]
+    );
   }
+
+  let balancePosition = getBalancePosition(vaultContract);
+  let grossReturnsGenerated = strategyReport.gain.minus(strategyReport.loss);
+
+  vaultUpdateLibrary.strategyReported(
+    vault,
+    transaction,
+    balancePosition,
+    grossReturnsGenerated,
+    getTotalAssets(vaultContract)
+  );
 }
 
 export function performanceFeeUpdated(
@@ -500,21 +475,14 @@ export function performanceFeeUpdated(
       performanceFee.toString(),
     ]);
 
-    if (vault.latestUpdate !== null) {
-      let latestVaultUpdate = VaultUpdate.load(vault.latestUpdate!);
-
-      if (latestVaultUpdate !== null) {
-        let vaultUpdate = vaultUpdateLibrary.performanceFeeUpdated(
-          vault as Vault,
-          ethTransaction,
-          latestVaultUpdate as VaultUpdate,
-          getBalancePosition(vaultContract),
-          performanceFee,
-          getTotalAssets(vaultContract)
-        ) as VaultUpdate;
-        vault.latestUpdate = vaultUpdate.id;
-      }
-    }
+    let vaultUpdate = vaultUpdateLibrary.performanceFeeUpdated(
+      vault as Vault,
+      ethTransaction,
+      getBalancePosition(vaultContract),
+      performanceFee,
+      getTotalAssets(vaultContract)
+    ) as VaultUpdate;
+    vault.latestUpdate = vaultUpdate.id;
 
     vault.performanceFeeBps = performanceFee.toI32();
     vault.save();
@@ -539,21 +507,14 @@ export function managementFeeUpdated(
       managementFee.toString(),
     ]);
 
-    if (vault.latestUpdate !== null) {
-      let latestVaultUpdate = VaultUpdate.load(vault.latestUpdate!);
-
-      if (latestVaultUpdate !== null) {
-        let vaultUpdate = vaultUpdateLibrary.managementFeeUpdated(
-          vault as Vault,
-          ethTransaction,
-          latestVaultUpdate as VaultUpdate,
-          getBalancePosition(vaultContract),
-          managementFee,
-          getTotalAssets(vaultContract)
-        ) as VaultUpdate;
-        vault.latestUpdate = vaultUpdate.id;
-      }
-    }
+    let vaultUpdate = vaultUpdateLibrary.managementFeeUpdated(
+      vault as Vault,
+      ethTransaction,
+      getBalancePosition(vaultContract),
+      managementFee,
+      getTotalAssets(vaultContract)
+    ) as VaultUpdate;
+    vault.latestUpdate = vaultUpdate.id;
 
     vault.managementFeeBps = managementFee.toI32();
     vault.save();
@@ -608,26 +569,14 @@ export function handleUpdateRewards(
       rewards.toHexString(),
     ]);
 
-    if (vault.latestUpdate) {
-      let latestVaultUpdate = VaultUpdate.load(vault.latestUpdate as string);
-
-      if (latestVaultUpdate !== null) {
-        log.info('Vault latest update: {}', [vault.latestUpdate as string]);
-        log.info('pricePerShare: {}', [
-          latestVaultUpdate.pricePerShare.toString(),
-        ]);
-        let vaultUpdate = vaultUpdateLibrary.rewardsUpdated(
-          vault as Vault,
-          ethTransaction,
-          latestVaultUpdate as VaultUpdate,
-          getBalancePosition(vaultContract),
-          getTotalAssets(vaultContract),
-          rewards
-        ) as VaultUpdate;
-        vault.latestUpdate = vaultUpdate.id;
-      }
-    }
-
+    let vaultUpdate = vaultUpdateLibrary.rewardsUpdated(
+      vault as Vault,
+      ethTransaction,
+      getBalancePosition(vaultContract),
+      getTotalAssets(vaultContract),
+      rewards
+    ) as VaultUpdate;
+    vault.latestUpdate = vaultUpdate.id;
     vault.rewards = rewards;
     vault.save();
   } else {

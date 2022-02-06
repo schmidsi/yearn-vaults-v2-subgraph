@@ -218,12 +218,12 @@ export async function buildOracleFixture(
     mockedFunctions: {
       getNormalizedValueUsdc: {
         fnName: 'getNormalizedValueUsdc',
-        fnSignature: 'getNormalizedValueUsdc(address,uint128):(uint256)',
+        fnSignature: 'getNormalizedValueUsdc(address,uint256):(uint256)',
         cases: quantity_results,
       },
       tryGetNormalizedValueUsdc: {
         fnName: 'try_getNormalizedValueUsdc',
-        fnSignature: 'getNormalizedValueUsdc(address,uint128):(uint256)',
+        fnSignature: 'getNormalizedValueUsdc(address,uint256):(uint256)',
         cases: quantity_results,
       },
       getPriceUsdcRecommended: {
