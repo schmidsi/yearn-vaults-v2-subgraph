@@ -6,6 +6,14 @@ All notable changes to the subgraph will be documented in this file.
 
 ### Added
 
+### Changed
+
+### Fixed
+
+## [v0.0.4] - 2022-02-07
+
+### Added
+
 - Vault Deposit event support for vaults v0.4.4+
 - Vault Withdraw event support for vaults v0.4.4+
 - Added logic for Vault-centric health checks
