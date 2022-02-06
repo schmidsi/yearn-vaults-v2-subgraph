@@ -20,7 +20,7 @@
     "deploy:fantom": "yarn prepare:fantom && yarn build:fantom && yarn thegraph:deploy:fantom",
     "deploy:arbitrum": "yarn prepare:arbitrum && yarn build:arbitrum && yarn thegraph:deploy:arbitrum",
     "release": "standard-version",
-    "test": "graph test -v 0.2.0",
+    "test": "graph test -v 0.2.3",
     "build:fixtures": "tsc -b && node ./tests/fixtureGenerator/out/main.js",
     "deploy:mainnet": "yarn prepare:mainnet && yarn build:mainnet && yarn thegraph:deploy:mainnet",
     "lint:check": "prettier --check './**'",

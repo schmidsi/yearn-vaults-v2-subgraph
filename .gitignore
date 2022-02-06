@@ -113,3 +113,5 @@ out/
 tests/fixtureGenerator/config.json
 tests/.tools
 tests/.bin
+# matchstick-as
+.bin
