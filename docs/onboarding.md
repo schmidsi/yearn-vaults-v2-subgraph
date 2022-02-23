@@ -48,7 +48,7 @@ In this case, we only create the new `VaultUpdate` item, setting the `VaultUpdat
 
 `VaultUpdate` entities contain three categories of data;
 
-1. Data representing the value of a Vault field at the time of the update; denoted with the _current_ modifier. (e.g. currentManagementFee, currentPricePerShare)
+1. Data representing the value of a Vault field at the time of the update; denoted with the _current_ modifier. (e.g. currentManagementFee)
 2. Data representing how the state of the Vault has been changed by the event (e.g. tokensDeposited, sharesBurnt)
 3. Metadata for the update (e.g. blockNumber, transaction, vault)
 

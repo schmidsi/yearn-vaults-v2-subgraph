@@ -28,7 +28,7 @@ export function updateVaultDayData(
     vaultDayData = new VaultDayData(vaultDayID);
     vaultDayData.timestamp = getTimeInMillis(getDayStartTimestamp(timestamp));
     vaultDayData.vault = vault.id;
-    vaultDayData.pricePerShare = vaultUpdate.currentPricePerShare;
+    vaultDayData.pricePerShare = vaultUpdate.pricePerShare;
     vaultDayData.deposited = BIGINT_ZERO;
     vaultDayData.withdrawn = BIGINT_ZERO;
     vaultDayData.totalReturnsGenerated = BIGINT_ZERO;
@@ -45,7 +45,7 @@ export function updateVaultDayData(
   ]);
   vaultDayData.tokenPriceUSDC = usdcPrice;
 
-  vaultDayData.pricePerShare = vaultUpdate.currentPricePerShare;
+  vaultDayData.pricePerShare = vaultUpdate.pricePerShare;
   vaultDayData.deposited = vaultDayData.deposited.plus(
     vaultUpdate.tokensDeposited
   );

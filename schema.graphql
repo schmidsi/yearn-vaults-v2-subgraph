@@ -210,7 +210,7 @@ type VaultUpdate @entity {
   ### VAULT STATE
 
   "Price per full share at the time of the update. Denominated in want tokens."
-  currentPricePerShare: BigInt!
+  pricePerShare: BigInt!
   "Balance of Tokens in the Vault and its Strategies at the time of update. "
   currentBalanceTokens: BigInt!
 

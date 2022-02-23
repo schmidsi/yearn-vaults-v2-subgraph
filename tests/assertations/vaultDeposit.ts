@@ -162,7 +162,7 @@ export function validateDepositStateTransition(
   assert.fieldEquals(
     'VaultUpdate',
     vaultUpdateId,
-    'currentPricePerShare',
+    'pricePerShare',
     expectedPricePerShare
   );
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'totalFees', '0');

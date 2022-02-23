@@ -31,7 +31,7 @@ All notable changes to the subgraph will be documented in this file.
 - VaultUpdate.managementFees has been renamed to VaultUpdate.newManagementFee. This field will only have a value set if its value has changed as part of the VaultUpdate.
 - VaultUpdate.performanceFees has been renamed to VaultUpdate.newPerformanceFee. This field will only have a value set if its value has changed as part of the VaultUpdate.
 - VaultUpdate.rewards has been renamed to VaultUpdate.newRewards. This field will only have a value set if its value has changed as part of the VaultUpdate.
-- VaultUpdate.pricePerShare has been renamed VaultUpdate.currentPricePerShare. This field will now always have a value set.
+- VaultUpdate.pricePerShare will now always have a value set.
 - TokenFee.strategyFees has been renamed to TokenFee.totalStrategyFees
 - TokenFee.treasuryFees has been renamed to TokenFee.totalTreasuryFees
 - VaultUpdate.totalFees now denominates fees in the Vault's want token rather than the Vault's share token.

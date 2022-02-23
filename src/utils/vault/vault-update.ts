@@ -131,7 +131,7 @@ function constructVaultUpdateEntity(
 
   let vaultUpdate = new VaultUpdate(id);
   vaultUpdate.totalFees = totalFees;
-  vaultUpdate.currentPricePerShare = pricePerShare;
+  vaultUpdate.pricePerShare = pricePerShare;
   vaultUpdate.currentBalanceTokens = balanceTokens;
   vaultUpdate.timestamp = transaction.timestamp;
   vaultUpdate.blockNumber = transaction.blockNumber;

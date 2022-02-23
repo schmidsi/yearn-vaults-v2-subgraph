@@ -714,7 +714,7 @@ export class VaultUpdate extends Entity {
     this.set("balancePosition", Value.fromBigInt(BigInt.zero()));
     this.set("returnsGenerated", Value.fromBigInt(BigInt.zero()));
     this.set("totalFees", Value.fromBigInt(BigInt.zero()));
-    this.set("currentPricePerShare", Value.fromBigInt(BigInt.zero()));
+    this.set("pricePerShare", Value.fromBigInt(BigInt.zero()));
     this.set("currentBalanceTokens", Value.fromBigInt(BigInt.zero()));
   }
 
@@ -843,13 +843,13 @@ export class VaultUpdate extends Entity {
     this.set("totalFees", Value.fromBigInt(value));
   }
 
-  get currentPricePerShare(): BigInt {
-    let value = this.get("currentPricePerShare");
+  get pricePerShare(): BigInt {
+    let value = this.get("pricePerShare");
     return value!.toBigInt();
   }
 
-  set currentPricePerShare(value: BigInt) {
-    this.set("currentPricePerShare", Value.fromBigInt(value));
+  set pricePerShare(value: BigInt) {
+    this.set("pricePerShare", Value.fromBigInt(value));
   }
 
   get currentBalanceTokens(): BigInt {
