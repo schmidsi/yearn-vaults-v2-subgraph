@@ -32,6 +32,7 @@ function getSushiSwapCalculationsAddress(network: string): Address {
 }
 
 function getOracleCalculatorAddress(network: string): Address {
+  log.debug('[Oracle] Loading price oracle for network: {}', [network]);
   let map = new Map<string, string>();
   map.set(ETH_MAINNET_NETWORK, ETH_MAINNET_USDC_ORACLE_ADDRESS);
   map.set(FTM_MAINNET_NETWORK, FTM_MAINNET_USDC_ORACLE_ADDRESS);
@@ -108,14 +109,30 @@ export function usdcPrice(token: Token, tokenAmount: BigInt): BigInt {
 }
 
 export function usdcPricePerToken(tokenAddress: Address): BigInt {
+  log.debug('[Oracle] Obtaining price for token {}', [
+    tokenAddress.toHexString(),
+  ]);
   let oracle = getOracleCalculator();
+  log.debug('[Oracle] Oracle calculator load attempted', []);
   if (oracle !== null) {
     let result = oracle.try_getPriceUsdcRecommended(tokenAddress);
-    if (result.reverted === false) {
+    if (result.reverted) {
+      log.info('[Oracle] Oracle reverted while obtaining price info for {}', [
+        tokenAddress.toHexString(),
+      ]);
+    } else {
+      log.debug('[Oracle] {} token price is {}', [
+        tokenAddress.toHexString(),
+        result.value.toString(),
+      ]);
       return result.value;
     }
+  } else {
+    log.debug(
+      '[Oracle] Unable to load oracle for the currently deployed network',
+      []
+    );
   }
-
   return BIGINT_ZERO;
 }
 
