@@ -8,7 +8,6 @@ import {
 import { Address, BigInt } from '@graphprotocol/graph-ts';
 import { BIGINT_ZERO } from '../constants';
 import { usdcPricePerToken } from '../oracle/usdc-oracle';
-import { getTimeInMillis } from '../commons';
 import { log } from 'matchstick-as';
 
 export function updateVaultDayData(
@@ -26,7 +25,7 @@ export function updateVaultDayData(
       vaultDayID,
     ]);
     vaultDayData = new VaultDayData(vaultDayID);
-    vaultDayData.timestamp = getTimeInMillis(getDayStartTimestamp(timestamp));
+    vaultDayData.timestamp = getDayStartTimestamp(timestamp);
     vaultDayData.vault = vault.id;
     vaultDayData.pricePerShare = vaultUpdate.pricePerShare;
     vaultDayData.deposited = BIGINT_ZERO;
