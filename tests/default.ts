@@ -25,6 +25,7 @@ export namespace defaults {
     bigInt,
     bigInt,
     bigInt,
+    bigInt,
     bigInt
   );
   export const eventDataLogType = 'default_log_type';
@@ -36,6 +37,7 @@ export namespace defaults {
     bigInt,
     bigInt,
     bigInt,
-    addressBytes
+    addressBytes,
+    bigInt // nonce
   );
 }

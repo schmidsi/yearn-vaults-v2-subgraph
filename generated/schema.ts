@@ -170,7 +170,6 @@ export class Token extends Entity {
     super();
     this.set("id", Value.fromString(id));
 
-    this.set("decimals", Value.fromI32(0));
     this.set("name", Value.fromString(""));
     this.set("symbol", Value.fromString(""));
   }
@@ -422,10 +421,7 @@ export class Vault extends Entity {
     this.set("balanceTokensInvested", Value.fromBigInt(BigInt.zero()));
     this.set("tokensDepositLimit", Value.fromBigInt(BigInt.zero()));
     this.set("sharesSupply", Value.fromBigInt(BigInt.zero()));
-    this.set("managementFeeBps", Value.fromI32(0));
-    this.set("performanceFeeBps", Value.fromI32(0));
     this.set("rewards", Value.fromBytes(Bytes.empty()));
-    this.set("isTemplateListening", Value.fromBoolean(false));
     this.set("activation", Value.fromBigInt(BigInt.zero()));
     this.set("apiVersion", Value.fromString(""));
   }
@@ -1294,8 +1290,6 @@ export class Transfer extends Entity {
     this.set("timestamp", Value.fromBigInt(BigInt.zero()));
     this.set("blockNumber", Value.fromBigInt(BigInt.zero()));
     this.set("transaction", Value.fromString(""));
-    this.set("isFeeToTreasury", Value.fromBoolean(false));
-    this.set("isFeeToStrategy", Value.fromBoolean(false));
   }
 
   save(): void {
@@ -1806,8 +1800,6 @@ export class Strategy extends Entity {
     this.set("blockNumber", Value.fromBigInt(BigInt.zero()));
     this.set("transaction", Value.fromString(""));
     this.set("address", Value.fromBytes(Bytes.empty()));
-    this.set("doHealthCheck", Value.fromBoolean(false));
-    this.set("inQueue", Value.fromBoolean(false));
     this.set("vault", Value.fromString(""));
     this.set("debtLimit", Value.fromBigInt(BigInt.zero()));
     this.set("minDebtPerHarvest", Value.fromBigInt(BigInt.zero()));

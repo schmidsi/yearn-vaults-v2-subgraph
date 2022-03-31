@@ -20,7 +20,7 @@
     "deploy:fantom": "yarn prepare:fantom && yarn build:fantom && yarn thegraph:deploy:fantom",
     "deploy:arbitrum": "yarn prepare:arbitrum && yarn build:arbitrum && yarn thegraph:deploy:arbitrum",
     "release": "standard-version",
-    "test": "graph test -v 0.2.3",
+    "test": "graph test -v 0.4.0",
     "build:fixtures": "tsc -b && node ./tests/fixtureGenerator/out/main.js",
     "deploy:mainnet": "yarn prepare:mainnet && yarn build:mainnet && yarn thegraph:deploy:mainnet",
     "lint:check": "prettier --check './**'",
@@ -31,9 +31,9 @@
     "clean": "rm -rf ./build && rm -rf ./tests/.bin"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "^0.23.0",
-    "@graphprotocol/graph-ts": "^0.23.0",
-    "matchstick-as": "^0.2.0",
+    "@graphprotocol/graph-cli": "0.29.0",
+    "@graphprotocol/graph-ts": "0.26.0",
+    "matchstick-as": "0.4.0",
     "mustache": "4.1.0",
     "typescript": "^4.5.2",
     "web3-eth": "^1.6.1"
@@ -46,5 +46,8 @@
     "prettier": "2.2.1",
     "sort-package-json": "1.49.0",
     "standard-version": "9.1.1"
-  }
+  },
+  "//": [
+    "graph-cli, graph-ts, and matchstick-as often have breaking changes in their minor versions, so they are pinned."
+  ]
 }

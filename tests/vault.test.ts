@@ -373,7 +373,7 @@ test('Test UpdatePerformanceFeeEvent', () => {
     performanceFee
   );
   // grab latest update and make sure it has the correct fee
-  let vaultEntity = VaultSchema.load(vaultAddress!);
+  let vaultEntity = VaultSchema.load(vaultAddress);
   assert.assertNotNull(vaultEntity);
   let latestUpdateId = vaultEntity!.latestUpdate;
   assert.assertNotNull(latestUpdateId);
@@ -429,7 +429,7 @@ test('Test UpdateManagementFeeEvent', () => {
 
   assert.fieldEquals('Vault', vaultAddress, 'managementFeeBps', managementFee);
   // grab latest update and make sure it has the correct fee
-  let vaultEntity = VaultSchema.load(vaultAddress!);
+  let vaultEntity = VaultSchema.load(vaultAddress);
   assert.assertNotNull(vaultEntity);
   let latestUpdateId = vaultEntity!.latestUpdate;
   assert.assertNotNull(latestUpdateId);
@@ -485,7 +485,7 @@ test('Test UpdateRewardsEvent', () => {
 
   assert.fieldEquals('Vault', vaultAddress, 'rewards', newRewardsAddress);
   // grab latest update and make sure it has the correct fee
-  let vaultEntity = VaultSchema.load(vaultAddress!);
+  let vaultEntity = VaultSchema.load(vaultAddress);
   assert.assertNotNull(vaultEntity);
   let latestUpdateId = vaultEntity!.latestUpdate;
   assert.assertNotNull(latestUpdateId);

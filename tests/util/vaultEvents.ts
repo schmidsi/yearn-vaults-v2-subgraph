@@ -244,7 +244,8 @@ export function createMockAddStrategyV1Event(
     defaults.bigInt,
     defaults.bigInt,
     defaults.bigInt,
-    defaults.addressBytes
+    defaults.addressBytes,
+    defaults.bigInt // nonce
   );
 
   let strategyParam = new ethereum.EventParam(
@@ -294,7 +295,8 @@ export function createMockAddStrategyV2Event(
     defaults.bigInt,
     defaults.bigInt,
     defaults.bigInt,
-    defaults.addressBytes
+    defaults.addressBytes,
+    defaults.bigInt // nonce
   );
 
   let strategyParam = new ethereum.EventParam(
@@ -349,7 +351,8 @@ export function createMockUpdatePerformanceFeeEvent(
     defaults.bigInt,
     defaults.bigInt,
     defaults.bigInt,
-    defaults.addressBytes
+    defaults.addressBytes,
+    defaults.bigInt // nonce
   );
 
   let performanceFeeParam = new ethereum.EventParam(
@@ -382,7 +385,8 @@ export function createMockUpdateManagementFeeEvent(
     defaults.bigInt,
     defaults.bigInt,
     defaults.bigInt,
-    defaults.addressBytes
+    defaults.addressBytes,
+    defaults.bigInt // nonce
   );
 
   let managementFeeParam = new ethereum.EventParam(
@@ -415,7 +419,8 @@ export function createMockUpdateRewardsEvent(
     defaults.bigInt,
     defaults.bigInt,
     defaults.bigInt,
-    defaults.addressBytes
+    defaults.addressBytes,
+    defaults.bigInt // nonce
   );
 
   let rewardsParam = new ethereum.EventParam(
