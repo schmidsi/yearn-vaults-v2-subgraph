@@ -1,10 +1,17 @@
-import { log } from '@graphprotocol/graph-ts';
+import { log, BigInt } from '@graphprotocol/graph-ts';
+import {
+  UpdateDepositLimit,
+  UpdateGovernance,
+  UpdateGuardian,
+  UpdateManagement,
+} from '../../generated/CurveSETHVault/Vault';
 import {
   Vault as VaultContract,
   UpdatePerformanceFee as UpdatePerformanceFeeEvent,
   UpdateManagementFee as UpdateManagementFeeEvent,
   StrategyAdded1 as StrategyAddedV2Event,
 } from '../../generated/Registry/Vault';
+import { Vault } from '../../generated/schema';
 import { isEventBlockNumberLt } from '../utils/commons';
 import {
   BIGINT_ZERO,
@@ -105,4 +112,53 @@ export function handleUpdateManagementFee(
       event.params.managementFee
     );
   }
+}
+
+export function handleUpdateGuardian(event: UpdateGuardian): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdateGuardian');
+
+  vaultLibrary.handleUpdateGuardian(
+    event.address,
+    event.params.guardian,
+    ethTransaction
+  );
+}
+
+export function handleUpdateManagement(event: UpdateManagement): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateManagement'
+  );
+
+  vaultLibrary.handleUpdateManagement(
+    event.address,
+    event.params.management,
+    ethTransaction
+  );
+}
+
+export function handleUpdateGovernance(event: UpdateGovernance): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateGovernance'
+  );
+
+  vaultLibrary.handleUpdateGovernance(
+    event.address,
+    event.params.governance,
+    ethTransaction
+  );
+}
+
+export function handleUpdateDepositLimit(event: UpdateDepositLimit): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateDepositLimit'
+  );
+
+  vaultLibrary.handleUpdateDepositLimit(
+    event.address,
+    event.params.depositLimit,
+    ethTransaction
+  );
 }

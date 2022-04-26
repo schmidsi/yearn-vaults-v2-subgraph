@@ -9,5 +9,11 @@
   "registryV2StartBlock": "9999999999",
 
   "manualVaults": [],
-  "vaultsWithPreregisteredStrategies": []
+  "vaultsWithPreregisteredStrategies": [],
+
+  "graftEnabled": false,
+  "graftBase": "subgraph_deployment_id",
+  "graftBlock": "0",
+
+  "disableProblematicCallHandlers": false
 }

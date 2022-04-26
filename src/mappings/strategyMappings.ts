@@ -1,4 +1,10 @@
-import { log } from '@graphprotocol/graph-ts';
+import {
+  ethereum,
+  log,
+  BigInt,
+  dataSource,
+  Address,
+} from '@graphprotocol/graph-ts';
 import {
   Harvested as HarvestedEvent,
   Cloned as ClonedEvent,
@@ -6,13 +12,21 @@ import {
   SetDoHealthCheckCall,
   SetHealthCheck as SetHealthCheckEvent,
   SetDoHealthCheck as SetDoHealthCheckEvent,
+  EmergencyExitEnabled,
+  UpdatedKeeper,
+  UpdatedStrategist,
+  UpdatedRewards,
 } from '../../generated/templates/Vault/Strategy';
+
+import { Vault as VaultContract } from '../../generated/templates/Vault/Vault';
 import * as strategyLibrary from '../utils/strategy/strategy';
 import {
   getOrCreateTransactionFromCall,
   getOrCreateTransactionFromEvent,
 } from '../utils/transaction';
 import { booleanToString } from '../utils/commons';
+import { UpdateRewards } from '../../generated/Registry/Vault';
+import { Strategy } from '../../generated/schema';
 
 export function handleSetHealthCheck(call: SetHealthCheckCall): void {
   let strategyAddress = call.to;
@@ -143,6 +157,48 @@ export function handleCloned(event: ClonedEvent): void {
   strategyLibrary.strategyCloned(
     clonedStrategyAddress,
     strategyAddress,
+    ethTransaction
+  );
+}
+
+export function handleEmergencyExitEnabled(event: EmergencyExitEnabled): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'EmergencyExitEnabled'
+  );
+
+  strategyLibrary.emergencyExitEnabled(event.address, ethTransaction);
+}
+
+export function handleUpdatedKeeper(event: UpdatedKeeper): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdatedKeeper');
+
+  strategyLibrary.updatedKeeper(
+    event.address,
+    event.params.newKeeper,
+    ethTransaction
+  );
+}
+
+export function handleUpdatedStrategist(event: UpdatedStrategist): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdatedStrategist'
+  );
+
+  strategyLibrary.updatedStrategist(
+    event.address,
+    event.params.newStrategist,
+    ethTransaction
+  );
+}
+
+export function handleUpdatedRewards(event: UpdatedRewards): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdatedRewards');
+
+  strategyLibrary.updatedRewards(
+    event.address,
+    event.params.rewards,
     ethTransaction
   );
 }

@@ -10,6 +10,42 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class UpdatedMinReportDelay extends ethereum.Event {
+  get params(): UpdatedMinReportDelay__Params {
+    return new UpdatedMinReportDelay__Params(this);
+  }
+}
+
+export class UpdatedMinReportDelay__Params {
+  _event: UpdatedMinReportDelay;
+
+  constructor(event: UpdatedMinReportDelay) {
+    this._event = event;
+  }
+
+  get delay(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
+export class UpdatedMaxReportDelay extends ethereum.Event {
+  get params(): UpdatedMaxReportDelay__Params {
+    return new UpdatedMaxReportDelay__Params(this);
+  }
+}
+
+export class UpdatedMaxReportDelay__Params {
+  _event: UpdatedMaxReportDelay;
+
+  constructor(event: UpdatedMaxReportDelay) {
+    this._event = event;
+  }
+
+  get delay(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
 export class EmergencyExitEnabled extends ethereum.Event {
   get params(): EmergencyExitEnabled__Params {
     return new EmergencyExitEnabled__Params(this);

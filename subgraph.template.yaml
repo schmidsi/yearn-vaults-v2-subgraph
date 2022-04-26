@@ -1,6 +1,11 @@
 specVersion: 0.0.3
 schema:
   file: ./schema.graphql
+{{#graftEnabled}}
+graft:
+  base: {{graftBase}}
+  block: {{graftBlock}}
+{{/graftEnabled}}
 dataSources:
   # 1. Registry
   - kind: ethereum/contract
@@ -12,7 +17,7 @@ dataSources:
       abi: Registry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -48,7 +53,7 @@ dataSources:
       abi: Registry
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -88,7 +93,7 @@ dataSources:
       abi: Vault
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -111,6 +116,14 @@ dataSources:
           # V2: StrategyAdded(strategy,debtRatio,minDebtPerHarvest,maxDebtPerHarvest,performanceFee)
         - event: StrategyAdded(indexed address,uint256,uint256,uint256,uint256)
           handler: handleStrategyAddedV2
+        - event: UpdateGuardian(address)
+          handler: handleUpdateGuardian
+        - event: UpdateManagement(address)
+          handler: handleUpdateManagement
+        - event: UpdateGovernance(address)
+          handler: handleUpdateGovernance
+        - event: UpdateDepositLimit(uint256)
+          handler: handleUpdateDepositLimit
       file: {{{mappingFile}}}
   {{/vaultsWithPreregisteredStrategies}}
 
@@ -128,7 +141,7 @@ dataSources:
       abi: Vault
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       entities:
         - Vault
@@ -154,6 +167,8 @@ dataSources:
           file: ./abis/Oracle.json
         - name: CalculationsCurve
           file: ./abis/CalculationsCurve.json
+        - name: CalculationsCurve_v0_8_7
+          file: ./abis/CalculationsCurve_v0_8_7.json
         - name: CalculationsSushiSwap
           file: ./abis/CalculationsSushiSwap.json
       eventHandlers:
@@ -185,20 +200,30 @@ dataSources:
           # V2: StrategyAdded(strategy,debtRatio,minDebtPerHarvest,maxDebtPerHarvest,performanceFee)
         - event: StrategyAdded(indexed address,uint256,uint256,uint256,uint256)
           handler: handleStrategyAddedV2
+        - event: UpdateGuardian(address)
+          handler: handleUpdateGuardian
+        - event: UpdateManagement(address)
+          handler: handleUpdateManagement
+        - event: UpdateGovernance(address)
+          handler: handleUpdateGovernance
+        - event: UpdateDepositLimit(uint256)
+          handler: handleUpdateDepositLimit
       {{#callHandlersEnabled}}
       callHandlers:
-        - function: deposit()
-          handler: handleDeposit
+        {{^disableProblematicCallHandlers}}
         - function: deposit(uint256)
           handler: handleDepositWithAmount
         - function: deposit(uint256,address)
           handler: handleDepositWithAmountAndRecipient
+        - function: deposit()
+          handler: handleDeposit
         - function: withdraw()
           handler: handleWithdraw
         - function: withdraw(uint256)
           handler: handleWithdrawWithShares
         - function: withdraw(uint256,address)
           handler: handleWithdrawWithSharesAndRecipient
+        {{/disableProblematicCallHandlers}}
       {{/callHandlersEnabled}}
       file: {{{mappingFile}}}
   {{/manualVaults}}
@@ -212,7 +237,7 @@ templates:
       abi: Vault
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: ./src/mappings/vaultMappings.ts
       entities:
@@ -240,6 +265,8 @@ templates:
           file: ./abis/Oracle.json
         - name: CalculationsCurve
           file: ./abis/CalculationsCurve.json
+        - name: CalculationsCurve_v0_8_7
+          file: ./abis/CalculationsCurve_v0_8_7.json
         - name: CalculationsSushiSwap
           file: ./abis/CalculationsSushiSwap.json
       eventHandlers:
@@ -273,20 +300,36 @@ templates:
           handler: handleStrategyAddedV2
         - event: UpdateHealthCheck(indexed address)
           handler: handleUpdateHealthCheck
+        - event: UpdateGuardian(address)
+          handler: handleUpdateGuardian
+        - event: UpdateManagement(address)
+          handler: handleUpdateManagement
+        - event: UpdateGovernance(address)
+          handler: handleUpdateGovernance
+        - event: UpdateDepositLimit(uint256)
+          handler: handleUpdateDepositLimit
+        - event: StrategyUpdateMinDebtPerHarvest(indexed address,uint256)
+          handler: handleStrategyUpdateMinDebtPerHarvest
+        - event: StrategyUpdateMaxDebtPerHarvest(indexed address,uint256)
+          handler: handleStrategyUpdateMaxDebtPerHarvest
+        - event: StrategyUpdatePerformanceFee(indexed address,uint256)
+          handler: handleStrategyUpdatePerformanceFee
       {{#callHandlersEnabled}}
       callHandlers:
-        - function: deposit()
-          handler: handleDeposit
+        {{^disableProblematicCallHandlers}}
         - function: deposit(uint256)
           handler: handleDepositWithAmount
         - function: deposit(uint256,address)
           handler: handleDepositWithAmountAndRecipient
+        - function: deposit()
+          handler: handleDeposit
         - function: withdraw()
           handler: handleWithdraw
         - function: withdraw(uint256)
           handler: handleWithdrawWithShares
         - function: withdraw(uint256,address)
           handler: handleWithdrawWithSharesAndRecipient
+        {{/disableProblematicCallHandlers}}
       {{/callHandlersEnabled}}
   - name: Strategy
     kind: ethereum/contract
@@ -295,7 +338,7 @@ templates:
       abi: Strategy
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.5
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: ./src/mappings/strategyMappings.ts
       entities:
@@ -323,6 +366,14 @@ templates:
           handler: handleSetHealthCheckEvent
         - event: SetDoHealthCheck(bool)
           handler: handleSetDoHealthCheckEvent
+        - event: EmergencyExitEnabled()
+          handler: handleEmergencyExitEnabled
+        - event: UpdatedKeeper(address)
+          handler: handleUpdatedKeeper
+        - event: UpdatedStrategist(address)
+          handler: handleUpdatedStrategist
+        - event: UpdatedRewards(address)
+          handler: handleUpdatedRewards
       {{#callHandlersEnabled}}
       callHandlers:
         - function: setHealthCheck(address)

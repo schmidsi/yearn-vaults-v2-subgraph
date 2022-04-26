@@ -4,9 +4,12 @@ import {
   Strategy,
   StrategyReport,
   Transaction,
+  Vault,
 } from '../../../generated/schema';
 import { Strategy as StrategyTemplate } from '../../../generated/templates';
 import { Strategy as StrategyContract } from '../../../generated/templates/Vault/Strategy';
+import { Vault as VaultContract } from '../../../generated/templates/Vault/Vault';
+import { bigIntExponential } from '../../../tests/util';
 import { booleanToString, getTimeInMillis } from '../commons';
 import { BIGINT_ZERO } from '../constants';
 import * as strategyReportLibrary from './strategy-report';
@@ -56,6 +59,22 @@ export function createAndGet(
     strategy.minDebtPerHarvest = minDebtPerHarvest;
     strategy.maxDebtPerHarvest = maxDebtPerHarvest;
     strategy.performanceFeeBps = performanceFee;
+    let tryApiVersion = strategyContract.try_apiVersion();
+    strategy.apiVersion = tryApiVersion.reverted ? '0' : tryApiVersion.value;
+    let tryKeeper = strategyContract.try_keeper();
+    strategy.keeper = tryKeeper.reverted ? Address.zero() : tryKeeper.value;
+    let tryStrategist = strategyContract.try_strategist();
+    strategy.strategist = tryStrategist.reverted
+      ? Address.zero()
+      : tryStrategist.value;
+    let tryRewards = strategyContract.try_rewards();
+    strategy.rewards = tryRewards.reverted ? Address.zero() : tryRewards.value;
+
+    let tryEmergencyExit = strategyContract.try_emergencyExit();
+    strategy.emergencyExit = tryEmergencyExit.reverted
+      ? false
+      : tryEmergencyExit.value;
+
     strategy.clonedFrom = clonedFrom ? clonedFrom.id : null;
 
     let tryHealthCheck = strategyContract.try_healthCheck();
@@ -165,6 +184,7 @@ export function harvest(
 
   if (harvest == null) {
     let strategyContract = StrategyContract.bind(strategyAddress);
+    let strategy = Strategy.load(strategyAddress.toHexString());
     harvest = new Harvest(harvestId);
     harvest.timestamp = timestamp;
     harvest.blockNumber = blockNumber;
@@ -262,4 +282,229 @@ export function doHealthCheckSet(
       txHash,
     ]);
   }
+}
+
+export function emergencyExitEnabled(
+  strategyAddress: Address,
+  transaction: Transaction
+): void {
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Handle EmergencyExitEnabled strategy {} and TxHash {}',
+    [strategyAddress.toHexString(), txHash]
+  );
+  let strategyId = buildId(strategyAddress);
+  let strategy = Strategy.load(strategyId);
+  if (strategy !== null) {
+    strategy.emergencyExit = true;
+    strategy.save();
+  } else {
+    log.warning('EmergencyExitEnabled Strategy {} not found in TxHash {}', [
+      strategyAddress.toHexString(),
+      txHash,
+    ]);
+  }
+}
+
+export function updatedKeeper(
+  strategyAddress: Address,
+  keeper: Address,
+  transaction: Transaction
+): void {
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Handle UpdatedKeeper {} strategy {} and TxHash {}',
+    [keeper.toHexString(), strategyAddress.toHexString(), txHash]
+  );
+  let strategyId = buildId(strategyAddress);
+  let strategy = Strategy.load(strategyId);
+  if (strategy !== null) {
+    strategy.keeper = keeper;
+    strategy.save();
+  } else {
+    log.warning('UpdatedKeeper {} Strategy {} not found in TxHash {}', [
+      keeper.toHexString(),
+      strategyAddress.toHexString(),
+      txHash,
+    ]);
+  }
+}
+
+export function updatedStrategist(
+  strategyAddress: Address,
+  strategist: Address,
+  transaction: Transaction
+): void {
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Handle UpdatedStrategist {} strategy {} and TxHash {}',
+    [strategist.toHexString(), strategyAddress.toHexString(), txHash]
+  );
+  let strategyId = buildId(strategyAddress);
+  let strategy = Strategy.load(strategyId);
+  if (strategy !== null) {
+    strategy.strategist = strategist;
+    strategy.save();
+  } else {
+    log.warning('UpdatedStrategist {} Strategy {} not found in TxHash {}', [
+      strategist.toHexString(),
+      strategyAddress.toHexString(),
+      txHash,
+    ]);
+  }
+}
+
+export function updatedRewards(
+  strategyAddress: Address,
+  rewards: Address,
+  transaction: Transaction
+): void {
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Handle UpdatedRewards {} strategy {} and TxHash {}',
+    [rewards.toHexString(), strategyAddress.toHexString(), txHash]
+  );
+  let strategyId = buildId(strategyAddress);
+  let strategy = Strategy.load(strategyId);
+  if (strategy !== null) {
+    strategy.rewards = rewards;
+    strategy.save();
+  } else {
+    log.warning('UpdatedRewards {} Strategy {} not found in TxHash {}', [
+      rewards.toHexString(),
+      strategyAddress.toHexString(),
+      txHash,
+    ]);
+  }
+}
+
+export function updateMaxDebtPerHarvest(
+  vaultAddress: Address,
+  strategyAddress: Address,
+  maxDebtPerHarvest: BigInt,
+  transaction: Transaction
+): void {
+  let strategyId = buildId(strategyAddress);
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Update MaxDebtPerHarvest for strategy {} tx {}',
+    [strategyId, txHash]
+  );
+
+  let vaultId = vaultAddress.toHexString();
+  let vault = Vault.load(vaultId);
+  if (!vault) {
+    log.critical(
+      '[Strategy Mapping] Vault entity does not exist: {} updateMaxDebtPerHarvest tx {}',
+      [vaultId, txHash]
+    );
+    return;
+  }
+
+  let strategy = Strategy.load(strategyId);
+  if (!strategy) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity does not exist: {} updateMaxDebtPerHarvest tx {}',
+      [strategyId, txHash]
+    );
+    return;
+  }
+
+  if (strategy.vault != vaultId) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity {} is not linked to this vault: {} tx: {}',
+      [strategyId, vaultId, txHash]
+    );
+    return;
+  }
+
+  strategy.maxDebtPerHarvest = maxDebtPerHarvest;
+  strategy.save();
+}
+
+export function updateMinDebtPerHarvest(
+  vaultAddress: Address,
+  strategyAddress: Address,
+  minDebtPerHarvest: BigInt,
+  transaction: Transaction
+): void {
+  let strategyId = buildId(strategyAddress);
+  let txHash = transaction.hash.toHexString();
+  log.info(
+    '[Strategy Mapping] Update minDebtPerHarvest for strategy {} tx {}',
+    [strategyId, txHash]
+  );
+
+  let vaultId = vaultAddress.toHexString();
+  let vault = Vault.load(vaultId);
+  if (!vault) {
+    log.critical(
+      '[Strategy Mapping] Vault entity does not exist: {} minDebtPerHarvest tx {}',
+      [vaultId, txHash]
+    );
+    return;
+  }
+
+  let strategy = Strategy.load(strategyId);
+  if (!strategy) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity does not exist: {} minDebtPerHarvest tx {}',
+      [strategyId, txHash]
+    );
+    return;
+  }
+  if (strategy.vault != vaultId) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity {} is not linked to this vault: {} tx: {}',
+      [strategyId, vaultId, txHash]
+    );
+    return;
+  }
+
+  strategy.minDebtPerHarvest = minDebtPerHarvest;
+  strategy.save();
+}
+
+export function updatePerformanceFee(
+  vaultAddress: Address,
+  strategyAddress: Address,
+  performanceFee: BigInt,
+  transaction: Transaction
+): void {
+  let strategyId = buildId(strategyAddress);
+  let txHash = transaction.hash.toHexString();
+  log.info('[Strategy Mapping] Update performanceFee for strategy {} tx {}', [
+    strategyId,
+    txHash,
+  ]);
+
+  let vaultId = vaultAddress.toHexString();
+  let vault = Vault.load(vaultId);
+  if (!vault) {
+    log.critical(
+      '[Strategy Mapping] Vault entity does not exist: {} performanceFee tx {}',
+      [vaultId, txHash]
+    );
+    return;
+  }
+
+  let strategy = Strategy.load(strategyId);
+  if (!strategy) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity does not exist: {} performanceFee tx {}',
+      [strategyId, txHash]
+    );
+    return;
+  }
+
+  if (strategy.vault != vaultId) {
+    log.critical(
+      '[Strategy Mapping] Strategy entity {} is not linked to this vault: {} tx: {}',
+      [strategyId, vaultId, txHash]
+    );
+    return;
+  }
+
+  strategy.performanceFeeBps = performanceFee;
+  strategy.save();
 }

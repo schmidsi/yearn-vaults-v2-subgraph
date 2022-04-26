@@ -1,6 +1,7 @@
-import { log, BigInt, ethereum, Bytes } from '@graphprotocol/graph-ts';
+import { log, BigInt, ethereum, Bytes, Address } from '@graphprotocol/graph-ts';
 import { Transaction } from '../../generated/schema';
 import { getTimestampInMillis } from './commons';
+import { ZERO_ADDRESS } from './constants';
 
 export function getOrCreateTransactionFromEvent(
   event: ethereum.Event,
@@ -36,6 +37,13 @@ export function getOrCreateTransactionFromCall(
   return transaction;
 }
 
+export function getTransactionId(
+  transactionHash: string,
+  logIndex: string
+): string {
+  return transactionHash.concat('-').concat(logIndex.toString());
+}
+
 function _getOrCreateTransaction(
   ethTransaction: ethereum.Transaction,
   logIndex: BigInt,
@@ -51,12 +59,17 @@ function _getOrCreateTransaction(
       ethTransaction.index.toString(),
     ]
   );
-  let id = ethTransaction.hash
-    .toHexString()
-    .concat('-')
-    .concat(logIndex.toString());
+  let id = getTransactionId(
+    ethTransaction.hash.toHexString(),
+    logIndex.toString()
+  );
   let transaction = Transaction.load(id);
   if (transaction == null) {
+    // Special handling for contract creates since ethTransaction.to will be null.
+    let toAddress: Bytes = Address.fromHexString(ZERO_ADDRESS) as Bytes;
+    if (ethTransaction.to) {
+      toAddress = ethTransaction.to as Bytes;
+    }
     transaction = new Transaction(id);
     transaction.logIndex = logIndex;
     transaction.from = ethTransaction.from;
@@ -64,7 +77,7 @@ function _getOrCreateTransaction(
     transaction.gasLimit = ethTransaction.gasLimit;
     transaction.hash = ethTransaction.hash;
     transaction.index = ethTransaction.index;
-    transaction.to = ethTransaction.to as Bytes;
+    transaction.to = toAddress;
     transaction.value = ethTransaction.value;
     transaction.timestamp = getTimestampInMillis(block);
     transaction.blockGasLimit = block.gasLimit;

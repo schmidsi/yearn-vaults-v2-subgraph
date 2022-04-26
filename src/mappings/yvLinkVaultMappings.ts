@@ -1,4 +1,4 @@
-import { Address, log } from '@graphprotocol/graph-ts';
+import { Address, log, BigInt } from '@graphprotocol/graph-ts';
 import { Vault as VaultContract } from '../../generated/Registry/Vault';
 import * as vaultLibrary from '../utils/vault/vault';
 import {
@@ -37,6 +37,12 @@ import {
   getOrCreateTransactionFromCall,
   getOrCreateTransactionFromEvent,
 } from '../utils/transaction';
+import {
+  UpdateDepositLimit,
+  UpdateGovernance,
+  UpdateGuardian,
+  UpdateManagement,
+} from '../../generated/YvLinkVault/Vault';
 
 function createYvLinkVaultIfNeeded(
   vaultAddress: Address,
@@ -775,4 +781,53 @@ export function handleUpdateRewards(event: UpdateRewardsEvent): void {
       ethTransaction
     );
   }
+}
+
+export function handleUpdateGuardian(event: UpdateGuardian): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdateGuardian');
+
+  vaultLibrary.handleUpdateGuardian(
+    event.address,
+    event.params.guardian,
+    ethTransaction
+  );
+}
+
+export function handleUpdateManagement(event: UpdateManagement): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateManagement'
+  );
+
+  vaultLibrary.handleUpdateManagement(
+    event.address,
+    event.params.management,
+    ethTransaction
+  );
+}
+
+export function handleUpdateGovernance(event: UpdateGovernance): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateGovernance'
+  );
+
+  vaultLibrary.handleUpdateGovernance(
+    event.address,
+    event.params.governance,
+    ethTransaction
+  );
+}
+
+export function handleUpdateDepositLimit(event: UpdateDepositLimit): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateDepositLimit'
+  );
+
+  vaultLibrary.handleUpdateDepositLimit(
+    event.address,
+    event.params.depositLimit,
+    ethTransaction
+  );
 }

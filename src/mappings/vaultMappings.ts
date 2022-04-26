@@ -1,4 +1,4 @@
-import { log } from '@graphprotocol/graph-ts';
+import { BigInt, log } from '@graphprotocol/graph-ts';
 import {
   StrategyReported as StrategyReported_v0_3_0_v0_3_1_Event,
   StrategyMigrated as StrategyMigratedEvent,
@@ -24,8 +24,15 @@ import {
   StrategyRemovedFromQueue as StrategyRemovedFromQueueEvent,
   UpdateRewards as UpdateRewardsEvent,
   UpdateHealthCheck as UpdateHealthCheckEvent,
+  UpdateGuardian,
+  UpdateManagement,
+  UpdateGovernance,
+  UpdateDepositLimit,
+  StrategyUpdatePerformanceFee as StrategyUpdatePerformanceFeeEvent,
+  StrategyUpdateMinDebtPerHarvest as StrategyUpdateMinDebtPerHarvestEvent,
+  StrategyUpdateMaxDebtPerHarvest as StrategyUpdateMaxDebtPerHarvestEvent,
 } from '../../generated/Registry/Vault';
-import { Strategy, StrategyMigration } from '../../generated/schema';
+import { Strategy, StrategyMigration, Vault } from '../../generated/schema';
 import { printCallInfo } from '../utils/commons';
 import { BIGINT_ZERO, BIGINT_MAX, ZERO_ADDRESS } from '../utils/constants';
 import * as strategyLibrary from '../utils/strategy/strategy';
@@ -518,9 +525,18 @@ export function handleTransfer(event: TransferEvent): void {
     event.params.sender.toHexString() != ZERO_ADDRESS &&
     event.params.receiver.toHexString() != ZERO_ADDRESS
   ) {
+    if (!vaultLibrary.isVault(event.address)) {
+      log.info(
+        '[Transfer] Transfer {} is not on behalf of a vault entity. Not processing.',
+        [event.transaction.hash.toHexString()]
+      );
+      return;
+    }
+
     log.info(
-      '[Vault mappings] Processing transfer: From: {} - To: {}. TX hash: {}',
+      '[Vault mappings] Processing transfer: Vault: {} From: {} - To: {}. TX hash: {}',
       [
+        event.address.toHexString(),
         event.params.sender.toHexString(),
         event.params.receiver.toHexString(),
         event.transaction.hash.toHexString(),
@@ -557,6 +573,55 @@ export function handleTransfer(event: TransferEvent): void {
       ]
     );
   }
+}
+
+export function handleUpdateGuardian(event: UpdateGuardian): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdateGuardian');
+
+  vaultLibrary.handleUpdateGuardian(
+    event.address,
+    event.params.guardian,
+    ethTransaction
+  );
+}
+
+export function handleUpdateManagement(event: UpdateManagement): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateManagement'
+  );
+
+  vaultLibrary.handleUpdateManagement(
+    event.address,
+    event.params.management,
+    ethTransaction
+  );
+}
+
+export function handleUpdateGovernance(event: UpdateGovernance): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateGovernance'
+  );
+
+  vaultLibrary.handleUpdateGovernance(
+    event.address,
+    event.params.governance,
+    ethTransaction
+  );
+}
+
+export function handleUpdateDepositLimit(event: UpdateDepositLimit): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateDepositLimit'
+  );
+
+  vaultLibrary.handleUpdateDepositLimit(
+    event.address,
+    event.params.depositLimit,
+    ethTransaction
+  );
 }
 
 export function handleUpdatePerformanceFee(
@@ -650,5 +715,50 @@ export function handleUpdateHealthCheck(event: UpdateHealthCheckEvent): void {
     event.address,
     event.params.healthCheck,
     ethTransaction
+  );
+}
+
+export function handleStrategyUpdateMaxDebtPerHarvest(
+  event: StrategyUpdateMaxDebtPerHarvestEvent
+): void {
+  let transaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateMaxDebtPerHarvest'
+  );
+  strategyLibrary.updateMaxDebtPerHarvest(
+    event.address,
+    event.params.strategy,
+    event.params.maxDebtPerHarvest,
+    transaction
+  );
+}
+
+export function handleStrategyUpdateMinDebtPerHarvest(
+  event: StrategyUpdateMinDebtPerHarvestEvent
+): void {
+  let transaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateMinDebtPerHarvest'
+  );
+  strategyLibrary.updateMinDebtPerHarvest(
+    event.address,
+    event.params.strategy,
+    event.params.minDebtPerHarvest,
+    transaction
+  );
+}
+
+export function handleStrategyUpdatePerformanceFee(
+  event: StrategyUpdatePerformanceFeeEvent
+): void {
+  let transaction = getOrCreateTransactionFromEvent(
+    event,
+    'StrategyUpdatePerformanceFeeEvent'
+  );
+  strategyLibrary.updatePerformanceFee(
+    event.address,
+    event.params.strategy,
+    event.params.performanceFee,
+    transaction
   );
 }

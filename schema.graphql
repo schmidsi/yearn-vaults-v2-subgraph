@@ -2,7 +2,7 @@
 ## Naming Conventions
 # Certain prefixes may be used to indicate a particular type of value.
 #   * total - indicates this is a cumulative value (e.g. totalSharesMinted, totalGrossReturns)
-#   * balance - indicates this is a spot balance (e.g. balanceTokensInvested, balanceTokensIdle)
+#   * balance - indicates this is a spot balance (e.g. balanceTokensIdle)
 #   * delta - indicates this value is the difference between the prior state and the current state (e.g. deltaPricePerShare)
 #   * current - used exclusively in Update entities. Similar to balance, current indicates the state of a field or value at the time of the update. These values are populated in every update whether they changed or not.
 #   * new - used exclusively in Update entities. Fields with this prefix will only be populated if they have changed since the last Update. If there has been no change, the value will be null.
@@ -149,10 +149,6 @@ type Vault @entity {
   balanceTokens: BigInt!
   "Current idle Token balance"
   balanceTokensIdle: BigInt! # Tokens in the Vault contract
-  "Balance of Tokens invested into Strategies"
-  balanceTokensInvested: BigInt!
-  "Deposit limit for Tokens in the Vault"
-  tokensDepositLimit: BigInt!
   "Current supply of Shares"
   sharesSupply: BigInt!
   "Management fee in basis points"
@@ -171,6 +167,16 @@ type Vault @entity {
   apiVersion: String!
   "The vault's health check contract."
   healthCheck: HealthCheck
+  "The address authorized for guardian interactions in the new Vault"
+  guardian: Bytes!
+  "The management address of the Vault to assert privileged functions that can only be called by management"
+  management: Bytes!
+  "The governance address of the Vault to assert privileged functions that can only be called by governance"
+  governance: Bytes!
+  "The maximum amount of underlying that can be deposited"
+  availableDepositLimit: BigInt!
+  "The maximum amount of tokens that can be deposited in this Vault"
+  depositLimit: BigInt!
 }
 
 type VaultUpdate @entity {
@@ -199,7 +205,6 @@ type VaultUpdate @entity {
   "The current balance position defined as: (vault.totalAssets() * (vault.pricePerShare() / 10**vault.decimals()))."
   balancePosition: BigInt!
 
-
   ### PERFORMANCE
 
   "Returns generated in Tokens"
@@ -224,6 +229,20 @@ type VaultUpdate @entity {
   newRewards: Bytes
   "The vault's new health check contract. If this value has not been changed since the last VaultEvent, it will be null."
   newHealthCheck: HealthCheck
+  "The maximum amount of underlying that can be deposited"
+  availableDepositLimit: BigInt!
+  "The maximum amount of tokens that can be deposited in this Vault"
+  depositLimit: BigInt!
+
+  ### MANAGEMENT
+
+  "The address authorized for guardian interactions in the new Vault"
+  guardian: Bytes!
+  "The management address of the Vault to assert privileged functions that can only be called by management"
+  management: Bytes!
+  "The governance address of the Vault to assert privileged functions that can only be called by governance"
+  governance: Bytes!
+  
 }
 
 type HealthCheck @entity {
@@ -427,7 +446,7 @@ type Strategy @entity {
   minDebtPerHarvest: BigInt!
   "Upper limit on the increase of debt since last harvest."
   maxDebtPerHarvest: BigInt!
-  "It is the current rate limit. It increases/decreases per block."
+  "It is the current rate limit. It increases/decreases per block. This field is currently only populated on strategy create"
   rateLimit: BigInt!
   "Defines the strategist's fee (basis points)."
   performanceFeeBps: BigInt!
@@ -437,6 +456,21 @@ type Strategy @entity {
   reports: [StrategyReport!]! @derivedFrom(field: "strategy")
   "harvest() calls"
   harvests: [Harvest!]! @derivedFrom(field: "strategy")
+  "Used to track the deployed version of this contract"
+  apiVersion: String!
+  "Determines if strategy is in emergency exit"
+  emergencyExit: Boolean!
+  "keeper is the only address that may call tend() or harvest(), other than governance() or strategist"
+  keeper: Bytes!
+  "The address of the strategist"
+  strategist: Bytes!
+  "The address for rewards"
+  rewards: Bytes!
+
+  #"Provide an indication of whether this strategy is currently active"
+  #isActive: Boolean!
+	#"Provide an accurate estimate for the total amount of assets (principle + return) that this Strategy is currently managing, denominated in terms of want tokens."
+  #estimatedTotalAssets: BigInt!
 }
 
 type StrategyMigration @entity {

@@ -84,8 +84,14 @@ function createVaultUpdate(
   vault.balanceTokensIdle = vault.balanceTokensIdle
     .plus(tokensDeposited)
     .minus(tokensWithdrawn);
-  // todo: balanceTokensInvested
+
   vault.sharesSupply = vault.sharesSupply.plus(sharesMinted).minus(sharesBurnt);
+  if (vault.depositLimit.le(vault.balanceTokens)) {
+    vault.availableDepositLimit = BIGINT_ZERO;
+  } else {
+    vault.availableDepositLimit = vault.depositLimit.minus(vault.balanceTokens);
+  }
+
   vault.save();
 
   updateVaultDayData(transaction, vault, vaultUpdate);

@@ -1,113 +1,65 @@
-import { clearStore, test, assert } from 'matchstick-as/assembly/index';
+import { assert, clearStore, log, test } from 'matchstick-as/assembly/index';
+import { CreateVaultTransition } from './transitionMocks/createVaultTransition';
+import { defaults } from './default';
+import { handleStrategyReported_v0_3_0_v0_3_1 } from '../src/mappings/vaultMappings';
+import { CreateStrategyTransition } from './transitionMocks/createStrategyTransition';
 import {
-  Address,
-  log,
-  BigInt,
-  Bytes,
-  ByteArray,
-  ethereum,
-} from '@graphprotocol/graph-ts';
-import { createRegistryV1Entity } from './util/registryEvents';
-import {
-  createMockAddStrategyV1Event,
-  createMockNewVaultEvent,
-  createMockStrategyReported_v3_0_v3_1_Event,
-} from './util/vaultEvents';
-import {
-  createMockHarvestedEvent,
-  createMockSetDoHealthCheckEvent,
-  createMockSetHealthCheckEvent,
-} from './util/strategyEvents';
-import {
-  handleStrategyReported_v0_3_0_v0_3_1,
-  handleStrategyAddedV1,
-} from '../src/mappings/vaultMappings';
-import {
-  handleHarvested,
-  handleSetHealthCheckEvent,
-  handleSetDoHealthCheckEvent,
-} from '../src/mappings/strategyMappings';
-
-import { CreateMockUSDCVault_1 } from './fixtures/CreateMockUSDCVault_1';
-import { AddStrategyToUSDCVault_2 } from './fixtures/AddStrategyToUSDCVault_2';
-import { HarvestStrategy_4 } from './fixtures/HarvestStrategy_4';
-import { handleNewVaultInner } from '../src/mappings/registryMappings';
-import { Strategy as StrategySchema } from '../generated/schema';
+  HarvestedTransition,
+  StrategyReported_v0_3_0_v0_3_1Transition,
+} from './transitionMocks/strategyTransitions';
 import { buildIdFromEvent } from '../src/utils/commons';
+import {
+  EmergencyExitTransition,
+  SetDoHealthCheckTransition,
+  SetHealthCheckTransition,
+  UpdatedKeeperTransition,
+  UpdatedRewardsTransition,
+  UpdatedStrategistTransition,
+} from './transitionMocks/strategyAttributeTransitions';
+import {
+  handleSetDoHealthCheckEvent,
+  handleSetHealthCheckEvent,
+} from '../src/mappings/strategyMappings';
+import { getDayIDFromIndex } from '../src/utils/vault/vault-day-data';
+import { BIGINT_ZERO } from '../src/utils/constants';
+import { Vault } from '../generated/schema';
 
-let registry_address = Address.fromString(
-  '0xa0c1a2ea0a861a967d9d0ffe2ae4012c2e053804'
-);
+test('Test handleHarvested Event', () => {
+  clearStore();
 
-test('Can add a strategy to a vault using handleAddStrategyV1 (call)', () => {
-  // setup the subgraph state
-  let registry = createRegistryV1Entity(registry_address);
-  CreateMockUSDCVault_1.mockChainState();
-  let vaultAddress = CreateMockUSDCVault_1.VaultAddress;
-  let wantTokenAddress = CreateMockUSDCVault_1.WantTokenAddress;
-  let apiVersion = '0.3.0';
-  let mockEvent = createMockNewVaultEvent(
-    Address.fromString(wantTokenAddress),
-    1,
-    Address.fromString(vaultAddress),
-    apiVersion
+  let vault = CreateVaultTransition.DefaultVault();
+  let vaultAddr = vault.stub.shareToken.address;
+
+  let strategy = new CreateStrategyTransition(
+    vault.stub,
+    null, // debt limit
+    null, // rate limit
+    null, // performance fee
+    null // strategyStub
   );
-  handleNewVaultInner(registry_address, mockEvent);
-
-  // actually start the test now
-  AddStrategyToUSDCVault_2.mockChainState();
-  let strategyAddress = AddStrategyToUSDCVault_2.StrategyAddress;
-
-  // from https://etherscan.io/tx/0x3e059ed2652468576e10ea90bc1c3fcf2f125bbdb31c2f9063cb5108c68e1c59#eventlog
-  let debtLimit = '9500';
-  let rateLimit = '2000000000000';
-  let performanceFee = '1000';
-  let mockAddStrategyEvent = createMockAddStrategyV1Event(
-    Address.fromString(strategyAddress),
-    Address.fromString(vaultAddress),
-    debtLimit,
-    rateLimit,
-    performanceFee
-  );
-
-  handleStrategyAddedV1(mockAddStrategyEvent);
-
-  let strategy = StrategySchema.load(strategyAddress);
-  assert.assertNotNull(strategy);
-  log.info('[TEST] Strategy built successfully', []);
-
-  assert.fieldEquals('Strategy', strategyAddress, 'vault', vaultAddress);
-});
-
-test('handleHarvested (event)', () => {
-  HarvestStrategy_4.mockChainState();
-  let vaultAddress = HarvestStrategy_4.VaultAddress;
-  let strategyAddress = HarvestStrategy_4.StrategyAddress;
-
-  // from https://etherscan.io/tx/0x03810d161c9d156415b307e4bc72ede7e3b2df801c8160ce6c4e5ba8e7d9a4c7#eventlog
-  let txnHash =
-    '0x03810d161c9d156415b307e4bc72ede7e3b2df801c8160ce6c4e5ba8e7d9a4c7';
+  let strategyAddress = strategy.stub.address;
   let profit = '33043378';
   let loss = '0';
   let debtPayment = '0';
-  let debtOutstanding = '0';
+  let debtOutstanding = '0'; // this means the vault acquired all of the tokens from the strategy?
 
-  let harvestedEvent = createMockHarvestedEvent(
-    txnHash,
-    Address.fromString(strategyAddress),
-    BigInt.fromString(profit),
-    BigInt.fromString(loss),
-    BigInt.fromString(debtPayment),
-    BigInt.fromString(debtOutstanding)
+  // this should be handled in the harvest transition, not here
+  strategy.stub.wantToken.setAccountBalance(strategyAddress, '0');
+  strategy.stub.wantToken.setAccountBalance(vaultAddr, profit);
+
+  let harvestTransition = new HarvestedTransition(
+    strategy.stub,
+    profit,
+    loss,
+    debtPayment,
+    debtOutstanding
   );
-  handleHarvested(harvestedEvent);
 
-  let txnIndex = '1';
   let harvestId = strategyAddress
     .concat('-')
-    .concat(txnHash)
+    .concat(harvestTransition.mockEvent.transaction.txnHash)
     .concat('-')
-    .concat(txnIndex);
+    .concat(harvestTransition.mockEvent.transaction.txnIndex);
 
   assert.fieldEquals('Harvest', harvestId, 'id', harvestId);
   assert.fieldEquals('Harvest', harvestId, 'profit', profit);
@@ -116,10 +68,16 @@ test('handleHarvested (event)', () => {
   assert.fieldEquals('Harvest', harvestId, 'debtOutstanding', debtOutstanding);
 });
 
-test('StrategyReported_v0_3_0_v0_3_1 (event)', () => {
-  // from https://etherscan.io/tx/0x03810d161c9d156415b307e4bc72ede7e3b2df801c8160ce6c4e5ba8e7d9a4c7#eventlog
-  let txnHash =
-    '0x03810d161c9d156415b307e4bc72ede7e3b2df801c8160ce6c4e5ba8e7d9a4c7';
+test('Test handleTransfer properly identifies Strategist fees', () => {});
+
+test('Test StrategyReported_v0_3_0_v0_3_1 Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let vaultAddress = vault.stub.shareToken.address;
+
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+
   let gain = '33043378';
   let loss = '0';
   let totalGain = '33043378';
@@ -127,23 +85,23 @@ test('StrategyReported_v0_3_0_v0_3_1 (event)', () => {
   let totalDebt = '559944200575';
   let debtAdded = '398061966813';
   let debtLimit = '9500';
-  // we're still on HarvestStrategy_4's chain state
-  let strategyAddress = HarvestStrategy_4.StrategyAddress;
-  let vaultAddress = HarvestStrategy_4.VaultAddress;
-  let strategyReportedEvent = createMockStrategyReported_v3_0_v3_1_Event(
-    txnHash,
-    Address.fromString(vaultAddress),
-    Address.fromString(strategyAddress),
-    BigInt.fromString(gain),
-    BigInt.fromString(loss),
-    BigInt.fromString(totalGain),
-    BigInt.fromString(totalLoss),
-    BigInt.fromString(totalDebt),
-    BigInt.fromString(debtAdded),
-    BigInt.fromString(debtLimit)
+
+  let strategyReport = new StrategyReported_v0_3_0_v0_3_1Transition(
+    vault.stub,
+    strategy.stub,
+    gain,
+    loss,
+    totalGain,
+    totalLoss,
+    totalDebt,
+    debtAdded,
+    debtLimit,
+    null,
+    null
   );
-  handleStrategyReported_v0_3_0_v0_3_1(strategyReportedEvent);
-  let strategyReportedId = buildIdFromEvent(strategyReportedEvent);
+
+  let strategyReportedId = buildIdFromEvent(strategyReport.mockEvent.mock);
+
   assert.fieldEquals(
     'StrategyReport',
     strategyReportedId,
@@ -176,47 +134,228 @@ test('StrategyReported_v0_3_0_v0_3_1 (event)', () => {
     'debtAdded',
     debtAdded
   );
-});
 
-test('SetHealthCheck (event)', () => {
-  // This event doesn't actually happen at this block height for this strategy,
-  // but fortunately we don't need to query the on-chain state to test this event handler.
-  let strategyAddress = HarvestStrategy_4.StrategyAddress;
-  let healthCheckAddress = '0x000000000000000000000000000000000000dead';
-  let setHealthCheckEvent = createMockSetHealthCheckEvent(
-    strategyAddress,
-    healthCheckAddress
+  //todo: move to transfer tests
+  // validate that fees have been recognized by accounting
+  /*
+  assert.fieldEquals('TokenFee', vaultAddress, 'unrecognizedTreasuryFees', '0');
+  assert.fieldEquals('TokenFee', vaultAddress, 'unrecognizedStrategyFees', '0');
+
+  assert.fieldEquals(
+    'TokenFee',
+    vaultAddress,
+    'totalTreasuryFees',
+    unrecognizedTreasuryFees
+  );
+  assert.fieldEquals(
+    'TokenFee',
+    vaultAddress,
+    'totalStrategyFees',
+    unrecognizedStrategistFees
+  );
+  assert.fieldEquals(
+    'TokenFee',
+    vaultAddress,
+    'totalFees',
+    totalFees.toString()
   );
 
-  handleSetHealthCheckEvent(setHealthCheckEvent);
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdate!,
+    'returnsGenerated',
+    returns.toString()
+  );
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdate!,
+    'totalFees',
+    totalFees.toString()
+  );
+	*/
+
+  let vaultEntity = Vault.load(vaultAddress);
+  let latestUpdate = vaultEntity!.latestUpdate;
+
+  assert.fieldEquals(
+    'VaultUpdate',
+    latestUpdate!,
+    'returnsGenerated',
+    totalGain
+  );
+
+  // make sure the values bubbled up into VaultDayData correctly
+  let vaultDayId = getDayIDFromIndex(vaultAddress, BIGINT_ZERO);
+  assert.fieldEquals('VaultDayData', vaultDayId, 'id', vaultDayId);
+  assert.fieldEquals(
+    'VaultDayData',
+    vaultDayId,
+    'totalReturnsGenerated',
+    totalGain
+  );
+  assert.fieldEquals(
+    'VaultDayData',
+    vaultDayId,
+    'dayReturnsGenerated',
+    totalGain
+  );
+
+  // no-op to mark test for coverage
+  handleStrategyReported_v0_3_0_v0_3_1(strategyReport.mockEvent.mock);
+});
+
+test('Test Strategy SetHealthCheck Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let vaultAddress = vault.stub.shareToken.address;
+
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let initialHealthCheckAddress = strategy.stub.healthCheck;
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'healthCheck',
+    initialHealthCheckAddress
+  );
+
+  let newHealthCheckAddress = defaults.senderAddress;
+
+  let setHealthCheckTransition = new SetHealthCheckTransition(
+    strategy.stub,
+    newHealthCheckAddress
+  );
 
   assert.fieldEquals(
     'Strategy',
     strategyAddress,
     'healthCheck',
-    healthCheckAddress
+    newHealthCheckAddress
+  );
+
+  // no-op to mark test for coverage
+  handleSetHealthCheckEvent(setHealthCheckTransition.mockEvent.mock);
+});
+
+test('Test Strategy setDoHealthCheck Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let vaultAddress = vault.stub.shareToken.address;
+
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let initlDoHealthCheck = strategy.stub.doHealthCheck;
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'doHealthCheck',
+    initlDoHealthCheck.toString()
+  );
+
+  let newDoHealthCheck: boolean;
+  // is there seriously not a more succinct way to do this in AS?
+  if (initlDoHealthCheck) {
+    newDoHealthCheck = false;
+  } else {
+    newDoHealthCheck = true;
+  }
+
+  let setDoHealthCheckTransition = new SetDoHealthCheckTransition(
+    strategy.stub,
+    newDoHealthCheck
+  );
+
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'doHealthCheck',
+    newDoHealthCheck.toString()
+  );
+
+  // no-op to mark test for coverage
+  handleSetDoHealthCheckEvent(setDoHealthCheckTransition.mockEvent.mock);
+});
+
+test('Test EmergencyExitEnabled Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let oldEmergencyExit = strategy.stub.emergencyExit;
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'emergencyExit',
+    oldEmergencyExit.toString()
+  );
+
+  let keeperUpdate = new EmergencyExitTransition(strategy.stub);
+  assert.fieldEquals('Strategy', strategyAddress, 'emergencyExit', 'true');
+});
+
+test('Test UpdatedKeeper Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let oldKeeperAdress = strategy.stub.keeper;
+  assert.fieldEquals('Strategy', strategyAddress, 'keeper', oldKeeperAdress);
+
+  let newKeeper = defaults.senderAddress;
+  let keeperUpdate = new UpdatedKeeperTransition(strategy.stub, newKeeper);
+  assert.fieldEquals('Strategy', strategyAddress, 'keeper', newKeeper);
+});
+
+test('Test UpdatedStrategist Event', () => {
+  clearStore();
+
+  let vault = CreateVaultTransition.DefaultVault();
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let oldStrategistAdress = strategy.stub.strategist;
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'strategist',
+    oldStrategistAdress
+  );
+
+  let newStrategistAddress = defaults.senderAddress;
+  let strategistUpdate = new UpdatedStrategistTransition(
+    strategy.stub,
+    newStrategistAddress
+  );
+  assert.fieldEquals(
+    'Strategy',
+    strategyAddress,
+    'strategist',
+    newStrategistAddress
   );
 });
 
-test('SetDoHealthCheck (event)', () => {
-  // This event doesn't actually happen at this block height for this strategy,
-  // but fortunately we don't need to query the on-chain state to test this event handler.
-  let strategyAddress = HarvestStrategy_4.StrategyAddress;
+test('Test UpdatedRewards Event', () => {
+  clearStore();
 
-  let enableHealthCheckEvent = createMockSetDoHealthCheckEvent(
-    strategyAddress,
-    true
+  let vault = CreateVaultTransition.DefaultVault();
+  let strategy = CreateStrategyTransition.DefaultStrategy(vault.stub);
+  let strategyAddress = strategy.stub.address;
+
+  let oldRewardsAdress = strategy.stub.rewards;
+  assert.fieldEquals('Strategy', strategyAddress, 'rewards', oldRewardsAdress);
+
+  let newRewardsAddress = defaults.senderAddress;
+  let rewardsUpdate = new UpdatedRewardsTransition(
+    strategy.stub,
+    newRewardsAddress
   );
-  handleSetDoHealthCheckEvent(enableHealthCheckEvent);
-
-  assert.fieldEquals('Strategy', strategyAddress, 'doHealthCheck', 'true');
-
-  let disableHealthCheckEvent = createMockSetDoHealthCheckEvent(
-    strategyAddress,
-    false
-  );
-  handleSetDoHealthCheckEvent(disableHealthCheckEvent);
-  assert.fieldEquals('Strategy', strategyAddress, 'doHealthCheck', 'false');
+  assert.fieldEquals('Strategy', strategyAddress, 'rewards', newRewardsAddress);
 });
-
-clearStore();

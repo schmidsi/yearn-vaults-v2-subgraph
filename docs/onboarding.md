@@ -20,7 +20,13 @@ Finally, once you have cloned the repo, install the dependencies:
 
 `yarn install`
 
-> Unfortunately, we still didn't implement tests in the repo for our handlers. If you are available to help us, feel free to create a PR with the first tests. See more info how to start contributing [here](#Do-you-want-to-contribute)
+`yarn prepare:mainnet`
+
+`yarn test`
+
+## Deploying to the Hosted Service
+
+If you'd like to try to deploy the subgraph, you can do so for free on thegraph's hosted service: https://thegraph.com/docs/en/hosted-service/deploy-subgraph-hosted/
 
 ## Important Concepts
 
@@ -29,7 +35,7 @@ Finally, once you have cloned the repo, install the dependencies:
 We may use specific prefixes to indicate a particular type of value.
 
 - total - indicates this is a cumulative value (e.g. totalSharesMinted, totalGrossReturns).
-- balance - indicates this is a spot balance (e.g. balanceTokensInvested, balanceTokensIdle)
+- balance - indicates this is a spot balance (e.g. balanceTokensIdle)
 - delta - indicates this value is the difference between the prior state and the current state (e.g. deltaPricePerShare).
 - current - used exclusively in **_Update_** entities. Similar to _balance_, current indicates the state of a field or value at the time of the update. These values are populated in every update whether they changed or not.
 - new - used exclusively in **_Update_** entities. Fields with this prefix will only be populated if they have changed since the last Update. If there has been no change, the value will be null.

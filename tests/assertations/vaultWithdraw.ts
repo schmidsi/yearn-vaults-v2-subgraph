@@ -14,7 +14,9 @@ export function validateWithdrawalStateTransition(
   txnHash: string,
   expectedWithdrawalAmount: string,
   expectedSharesBurned: string,
-  expectedPricePerShare: string
+  expectedPricePerShare: string,
+  transactionIndex: string | null,
+  logIndex: string | null
 ): void {
   let positionId = beneficiary.concat('-').concat(vault);
   assert.fieldEquals('AccountVaultPosition', positionId, 'balanceShares', '0');
@@ -30,15 +32,22 @@ export function validateWithdrawalStateTransition(
   */
 
   // Verify VaultUpdate
-  let transactionIndex = '1'; // todo: get from transaction
-  let logIndex = '1'; // todo: get from transaction
+  let txnIndexToUse = '1';
+  if (transactionIndex) {
+    txnIndexToUse = transactionIndex;
+  }
+
+  let logIndexToUse = '1';
+  if (logIndex) {
+    logIndexToUse = logIndex;
+  }
+
   // from _getOrCreateTransaction
-  let transactionHashId = txnHash.concat('-').concat(logIndex);
+  let transactionHashId = txnHash.concat('-').concat(logIndexToUse);
   // from buildIdFromVaultAndTransaction
   let vaultUpdateId = vault
     .concat('-')
-    .concat(transactionHashId.concat('-').concat(transactionIndex));
-  // todo: get from chain?
+    .concat(transactionHashId.concat('-').concat(txnIndexToUse));
 
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'id', vaultUpdateId);
   assert.fieldEquals(
@@ -55,18 +64,18 @@ export function validateWithdrawalStateTransition(
     'tokensWithdrawn',
     expectedWithdrawalAmount
   );
+  assert.fieldEquals(
+    'VaultUpdate',
+    vaultUpdateId,
+    'pricePerShare',
+    expectedPricePerShare
+  );
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'sharesMinted', '0');
   assert.fieldEquals(
     'VaultUpdate',
     vaultUpdateId,
     'sharesBurnt',
     expectedSharesBurned
-  );
-  assert.fieldEquals(
-    'VaultUpdate',
-    vaultUpdateId,
-    'pricePerShare',
-    expectedPricePerShare
   );
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'totalFees', '0');
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'newManagementFee', 'null');
@@ -105,7 +114,7 @@ export function validateWithdrawalStateTransition(
     .concat('-')
     .concat(transactionHashId)
     .concat('-')
-    .concat(transactionIndex);
+    .concat(txnIndexToUse);
   assert.fieldEquals('Withdrawal', withdrawlId, 'id', withdrawlId);
   assert.fieldEquals(
     'Withdrawal',

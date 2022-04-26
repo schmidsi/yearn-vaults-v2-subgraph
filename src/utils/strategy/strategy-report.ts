@@ -35,6 +35,9 @@ export function getOrCreate(
     strategyReport.debtLimit = debtLimit;
     strategyReport.debtPaid = debtPaid;
     strategyReport.save();
+
+    strategy.debtLimit = debtLimit;
+    strategy.save();
   }
   return strategyReport;
 }

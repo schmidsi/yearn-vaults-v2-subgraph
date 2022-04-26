@@ -46,5 +46,11 @@
       "mappingFile": "./src/mappings/curveSETHVaultMappings.ts",
       "comments": ["Custom CurveSETHVault From: 11870013 to 11881933", "Strategy was added before vault was registered. This datasource handles", "mappings that predate being added to the registry."]
     }
-  ]
+  ],
+
+  "graftEnabled": false,
+  "graftBase": "subgraph_deployment_id",
+  "graftBlock": "0",
+
+  "disableProblematicCallHandlers": false
 }

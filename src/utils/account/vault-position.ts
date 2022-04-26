@@ -27,8 +27,8 @@ export function getOrCreate(
 ): AccountVaultPosition {
   let txHash = transaction.hash.toHexString();
   log.info(
-    '[AccountVaultPosition-getOrCreate] Getting account {} vault {} position. TX: {}',
-    [account.id, vault.id, txHash]
+    '[AccountVaultPosition-getOrCreate] Getting account {} vault {} position. TX: {} Balance Tokens: {}',
+    [account.id, vault.id, txHash, balanceTokens.toString()]
   );
   let id = buildId(account, vault);
   let accountVaultPosition = AccountVaultPosition.load(id);

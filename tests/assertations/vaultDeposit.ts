@@ -15,7 +15,9 @@ export function validateDepositStateTransition(
   txnHash: string,
   expectedDepositAmount: string,
   expectedSharesMinted: string,
-  expectedPricePerShare: string
+  expectedPricePerShare: string,
+  transactionIndex: string | null,
+  logIndex: string | null
 ): void {
   assert.fieldEquals('Account', beneficiary, 'id', beneficiary);
 
@@ -127,15 +129,22 @@ export function validateDepositStateTransition(
     expectedSharesMinted
   );
 
-  // Verify VaultUpdate
-  let transactionIndex = '1'; // todo: get from transaction
-  let logIndex = '1'; // todo: get from transaction
+  // Verify VaultUpdat
+  let txIndexToUse = '1';
+  if (transactionIndex) {
+    txIndexToUse = transactionIndex;
+  }
+  let logIndexToUse = '1';
+  if (logIndex) {
+    logIndexToUse = logIndex;
+  }
+
   // from _getOrCreateTransaction
-  let transactionHashId = txnHash.concat('-').concat(logIndex);
+  let transactionHashId = txnHash.concat('-').concat(logIndexToUse);
   // from buildIdFromVaultAndTransaction
   let vaultUpdateId = vault
     .concat('-')
-    .concat(transactionHashId.concat('-').concat(transactionIndex));
+    .concat(transactionHashId.concat('-').concat(txIndexToUse));
 
   assert.fieldEquals('VaultUpdate', vaultUpdateId, 'id', vaultUpdateId);
   assert.fieldEquals(
@@ -180,7 +189,7 @@ export function validateDepositStateTransition(
     .concat('-')
     .concat(transactionHashId)
     .concat('-')
-    .concat(transactionIndex);
+    .concat(txIndexToUse);
   assert.fieldEquals('Deposit', depositId, 'id', depositId);
   assert.fieldEquals('Deposit', depositId, 'account', beneficiary);
   assert.fieldEquals('Deposit', depositId, 'vault', vault);

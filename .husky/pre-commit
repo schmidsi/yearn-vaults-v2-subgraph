@@ -1,4 +1,24 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+set +e
+yarn lint:check
+
+# just trying to make sure codegen can run successfully
+yarn codegen
+
+# clean up generated code so it doesnt mess up commits later
 yarn lint:fix
+
+# make sure all changes in generated code have been staged
+git diff --exit-code --quiet generated/
+if [ "$?" -eq 1 ]; then
+	git --no-pager diff --compact-summary generated/
+	echo "^^ There are unstaged changes in the generated code directory. Please stage them for commit."
+	exit 1
+fi
+
+# run tests
+yarn prepare:mainnet
+yarn test
+exit 0

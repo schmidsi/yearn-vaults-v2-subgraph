@@ -10,6 +10,144 @@ import {
   BigInt
 } from "@graphprotocol/graph-ts";
 
+export class StrategyUpdateMinDebtPerHarvest extends ethereum.Event {
+  get params(): StrategyUpdateMinDebtPerHarvest__Params {
+    return new StrategyUpdateMinDebtPerHarvest__Params(this);
+  }
+}
+
+export class StrategyUpdateMinDebtPerHarvest__Params {
+  _event: StrategyUpdateMinDebtPerHarvest;
+
+  constructor(event: StrategyUpdateMinDebtPerHarvest) {
+    this._event = event;
+  }
+
+  get strategy(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get minDebtPerHarvest(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class StrategyUpdateMaxDebtPerHarvest extends ethereum.Event {
+  get params(): StrategyUpdateMaxDebtPerHarvest__Params {
+    return new StrategyUpdateMaxDebtPerHarvest__Params(this);
+  }
+}
+
+export class StrategyUpdateMaxDebtPerHarvest__Params {
+  _event: StrategyUpdateMaxDebtPerHarvest;
+
+  constructor(event: StrategyUpdateMaxDebtPerHarvest) {
+    this._event = event;
+  }
+
+  get strategy(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get maxDebtPerHarvest(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class StrategyUpdatePerformanceFee extends ethereum.Event {
+  get params(): StrategyUpdatePerformanceFee__Params {
+    return new StrategyUpdatePerformanceFee__Params(this);
+  }
+}
+
+export class StrategyUpdatePerformanceFee__Params {
+  _event: StrategyUpdatePerformanceFee;
+
+  constructor(event: StrategyUpdatePerformanceFee) {
+    this._event = event;
+  }
+
+  get strategy(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get performanceFee(): BigInt {
+    return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class UpdateGuardian extends ethereum.Event {
+  get params(): UpdateGuardian__Params {
+    return new UpdateGuardian__Params(this);
+  }
+}
+
+export class UpdateGuardian__Params {
+  _event: UpdateGuardian;
+
+  constructor(event: UpdateGuardian) {
+    this._event = event;
+  }
+
+  get guardian(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateManagement extends ethereum.Event {
+  get params(): UpdateManagement__Params {
+    return new UpdateManagement__Params(this);
+  }
+}
+
+export class UpdateManagement__Params {
+  _event: UpdateManagement;
+
+  constructor(event: UpdateManagement) {
+    this._event = event;
+  }
+
+  get management(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateGovernance extends ethereum.Event {
+  get params(): UpdateGovernance__Params {
+    return new UpdateGovernance__Params(this);
+  }
+}
+
+export class UpdateGovernance__Params {
+  _event: UpdateGovernance;
+
+  constructor(event: UpdateGovernance) {
+    this._event = event;
+  }
+
+  get governance(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateDepositLimit extends ethereum.Event {
+  get params(): UpdateDepositLimit__Params {
+    return new UpdateDepositLimit__Params(this);
+  }
+}
+
+export class UpdateDepositLimit__Params {
+  _event: UpdateDepositLimit;
+
+  constructor(event: UpdateDepositLimit) {
+    this._event = event;
+  }
+
+  get depositLimit(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
 export class Transfer extends ethereum.Event {
   get params(): Transfer__Params {
     return new Transfer__Params(this);
@@ -33,6 +171,24 @@ export class Transfer__Params {
 
   get value(): BigInt {
     return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class UpdateHealthCheck extends ethereum.Event {
+  get params(): UpdateHealthCheck__Params {
+    return new UpdateHealthCheck__Params(this);
+  }
+}
+
+export class UpdateHealthCheck__Params {
+  _event: UpdateHealthCheck;
+
+  constructor(event: UpdateHealthCheck) {
+    this._event = event;
+  }
+
+  get healthCheck(): Address {
+    return this._event.parameters[0].value.toAddress();
   }
 }
 
@@ -332,6 +488,78 @@ export class UpdateManagementFee__Params {
   }
 }
 
+export class UpdateManagement1 extends ethereum.Event {
+  get params(): UpdateManagement1__Params {
+    return new UpdateManagement1__Params(this);
+  }
+}
+
+export class UpdateManagement1__Params {
+  _event: UpdateManagement1;
+
+  constructor(event: UpdateManagement1) {
+    this._event = event;
+  }
+
+  get management(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateGuardian1 extends ethereum.Event {
+  get params(): UpdateGuardian1__Params {
+    return new UpdateGuardian1__Params(this);
+  }
+}
+
+export class UpdateGuardian1__Params {
+  _event: UpdateGuardian1;
+
+  constructor(event: UpdateGuardian1) {
+    this._event = event;
+  }
+
+  get guardian(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateGovernance1 extends ethereum.Event {
+  get params(): UpdateGovernance1__Params {
+    return new UpdateGovernance1__Params(this);
+  }
+}
+
+export class UpdateGovernance1__Params {
+  _event: UpdateGovernance1;
+
+  constructor(event: UpdateGovernance1) {
+    this._event = event;
+  }
+
+  get governance(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
+export class UpdateDepositLimit1 extends ethereum.Event {
+  get params(): UpdateDepositLimit1__Params {
+    return new UpdateDepositLimit1__Params(this);
+  }
+}
+
+export class UpdateDepositLimit1__Params {
+  _event: UpdateDepositLimit1;
+
+  constructor(event: UpdateDepositLimit1) {
+    this._event = event;
+  }
+
+  get depositLimit(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
+  }
+}
+
 export class StrategyRemovedFromQueue extends ethereum.Event {
   get params(): StrategyRemovedFromQueue__Params {
     return new StrategyRemovedFromQueue__Params(this);
@@ -433,6 +661,21 @@ export class Vault__strategiesResult {
 export class Vault extends ethereum.SmartContract {
   static bind(address: Address): Vault {
     return new Vault("Vault", address);
+  }
+
+  management(): Address {
+    let result = super.call("management", "management():(address)", []);
+
+    return result[0].toAddress();
+  }
+
+  try_management(): ethereum.CallResult<Address> {
+    let result = super.tryCall("management", "management():(address)", []);
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
   apiVersion(): string {

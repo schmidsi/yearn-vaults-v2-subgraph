@@ -7,6 +7,32 @@
     },
     {
       "anonymous": false,
+      "name": "UpdatedMinReportDelay",
+      "type": "event",
+      "inputs": [
+        {
+          "indexed": false,
+          "type": "uint256",
+          "internalType": "uint256",
+          "name": "delay"
+        }
+      ]
+    },
+    {
+      "anonymous": false,
+      "name": "UpdatedMaxReportDelay",
+      "type": "event",
+      "inputs": [
+        {
+          "indexed": false,
+          "type": "uint256",
+          "internalType": "uint256",
+          "name": "delay"
+        }
+      ]
+    },
+    {
+      "anonymous": false,
       "inputs": [],
       "name": "EmergencyExitEnabled",
       "type": "event"

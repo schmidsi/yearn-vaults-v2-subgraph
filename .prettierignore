@@ -9,6 +9,7 @@
 .env.example
 *.txt
 *.graphql
+.vscode/
 
 # The graph
 generated

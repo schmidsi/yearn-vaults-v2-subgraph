@@ -42,7 +42,6 @@ const createNewVaultFromAddress = (
   let vaultContract = VaultContract.bind(vaultAddress);
   let token = getOrCreateToken(vaultContract.token());
   let shareToken = getOrCreateToken(vaultAddress);
-
   vaultEntity.transaction = transaction.id;
   vaultEntity.token = token.id;
   vaultEntity.shareToken = shareToken.id;
@@ -54,18 +53,32 @@ const createNewVaultFromAddress = (
   vaultEntity.tags = [];
   vaultEntity.balanceTokens = BIGINT_ZERO;
   vaultEntity.balanceTokensIdle = BIGINT_ZERO;
-  vaultEntity.balanceTokensInvested = BIGINT_ZERO;
 
-  vaultEntity.tokensDepositLimit = BIGINT_ZERO;
   vaultEntity.sharesSupply = BIGINT_ZERO;
   vaultEntity.managementFeeBps = vaultContract.managementFee().toI32();
   vaultEntity.performanceFeeBps = vaultContract.performanceFee().toI32();
-  vaultEntity.rewards = vaultContract.rewards();
+  let tryRewards = vaultContract.try_rewards();
+  vaultEntity.rewards = tryRewards.reverted ? Address.zero() : tryRewards.value;
 
-  // vaultEntity.tokensDepositLimit = vaultContract.depositLimit()
-  // vaultEntity.sharesSupply = vaultContract.totalSupply()
-  // vaultEntity.managementFeeBps = vaultContract.managementFee().toI32()
-  // vaultEntity.performanceFeeBps = vaultContract.performanceFee().toI32()
+  let tryManagement = vaultContract.try_management();
+  vaultEntity.management = tryManagement.reverted
+    ? Address.zero()
+    : tryManagement.value;
+
+  let tryGuardian = vaultContract.try_guardian();
+  vaultEntity.guardian = tryGuardian.reverted
+    ? Address.zero()
+    : tryGuardian.value;
+
+  let tryGovernance = vaultContract.try_governance();
+  vaultEntity.governance = tryGovernance.reverted
+    ? Address.zero()
+    : tryGovernance.value;
+
+  let tryDepositLimit = vaultContract.try_depositLimit();
+  vaultEntity.depositLimit = tryDepositLimit.reverted
+    ? BigInt.zero()
+    : tryDepositLimit.value;
 
   // vault fields
   vaultEntity.activation = vaultContract.activation();
@@ -102,7 +115,7 @@ export function create(
   apiVersion: string,
   createTemplate: boolean
 ): Vault {
-  log.info('[Vault] Create vault', []);
+  log.info('[Vault] Create vault {}', [vault.toHexString()]);
   let id = vault.toHexString();
   let vaultEntity = Vault.load(id);
   if (vaultEntity == null) {
@@ -399,12 +412,12 @@ export function transfer(
   from: Address,
   to: Address,
   amount: BigInt,
-  tokenAddress: Address,
+  wantTokenAddress: Address,
   shareAmount: BigInt,
   vaultAddress: Address,
   transaction: Transaction
 ): void {
-  let token = tokenLibrary.getOrCreateToken(tokenAddress);
+  let token = tokenLibrary.getOrCreateToken(wantTokenAddress);
   let shareToken = tokenLibrary.getOrCreateToken(vaultAddress);
   let fromAccount = accountLibrary.getOrCreate(from);
   let toAccount = accountLibrary.getOrCreate(to);
@@ -664,5 +677,141 @@ export function handleUpdateHealthCheck(
     vault.save();
 
     vaultUpdateLibrary.healthCheckUpdated(vault, transaction, healthCheck.id);
+  }
+}
+
+export function handleUpdateGuardian(
+  vaultAddress: Address,
+  guardianAddress: Address,
+  transaction: Transaction
+): void {
+  let vault = Vault.load(vaultAddress.toHexString());
+  if (vault === null) {
+    log.warning(
+      'Failed to update vault guardian, vault does not exist. Vault address: {} guardian address: {}  Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        guardianAddress.toHexString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    return;
+  } else {
+    log.info(
+      'Vault guardian updated. Vault address: {}, To: {}, on Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        guardianAddress.toString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    vault.guardian = guardianAddress;
+    vault.save();
+  }
+}
+
+export function handleUpdateManagement(
+  vaultAddress: Address,
+  managementAddress: Address,
+  transaction: Transaction
+): void {
+  let vault = Vault.load(vaultAddress.toHexString());
+  if (vault === null) {
+    log.warning(
+      'Failed to update vault management, vault does not exist. Vault address: {} guardian address: {}  Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        managementAddress.toHexString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    return;
+  } else {
+    log.info(
+      'Vault management updated. Vault address: {}, To: {}, on Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        managementAddress.toString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+
+    vault.management = managementAddress;
+    vault.save();
+  }
+}
+
+export function handleUpdateGovernance(
+  vaultAddress: Address,
+  governanceAddress: Address,
+  transaction: Transaction
+): void {
+  let vault = Vault.load(vaultAddress.toHexString());
+  if (vault === null) {
+    log.warning(
+      'Failed to update vault governance, vault does not exist. Vault address: {} guardian address: {}  Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        governanceAddress.toHexString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    return;
+  } else {
+    log.info('Vault governance updated. Address: {}, To: {}, on Txn hash: {}', [
+      vaultAddress.toHexString(),
+      governanceAddress.toString(),
+      transaction.hash.toHexString(),
+    ]);
+
+    vault.governance = governanceAddress;
+    vault.save();
+  }
+}
+
+export function handleUpdateDepositLimit(
+  vaultAddress: Address,
+  depositLimit: BigInt,
+  transaction: Transaction
+): void {
+  let vault = Vault.load(vaultAddress.toHexString());
+  let vaultContract = VaultContract.bind(vaultAddress);
+  if (vault === null) {
+    log.warning(
+      'Failed to update vault deposit limit, vault does not exist. Vault address: {} deposit limit: {}  Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        depositLimit.toString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+    return;
+  } else {
+    log.info(
+      'Vault deposit limit updated. Address: {}, To: {}, on Txn hash: {}',
+      [
+        vaultAddress.toHexString(),
+        depositLimit.toString(),
+        transaction.hash.toHexString(),
+      ]
+    );
+
+    vault.depositLimit = depositLimit;
+    let tryAvailableDepositLimit = vaultContract.try_availableDepositLimit();
+    let availableDepositLimit = tryAvailableDepositLimit.reverted
+      ? BigInt.zero()
+      : tryAvailableDepositLimit.value;
+    vault.availableDepositLimit = availableDepositLimit;
+    if (
+      availableDepositLimit != BigInt.zero() &&
+      vault.depositLimit > availableDepositLimit
+    ) {
+      let tryTotalAssets = vaultContract.try_totalAssets();
+      let totalAssets = tryTotalAssets.reverted
+        ? BigInt.zero()
+        : tryTotalAssets.value;
+      vault.availableDepositLimit = vault.depositLimit.minus(totalAssets);
+    }
+    vault.save();
   }
 }

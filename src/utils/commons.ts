@@ -104,7 +104,7 @@ export function isEventBlockNumberLt(
   ]);
   let isEventBlockNumberLt = block.number.lt(maxBlock);
   if (!isEventBlockNumberLt) {
-    log.warning('{} - Not processing tx on block {}. Max block {}', [
+    log.debug('{} - Not processing tx on block {}. Max block {}', [
       label,
       block.number.toString(),
       maxBlock.toString(),

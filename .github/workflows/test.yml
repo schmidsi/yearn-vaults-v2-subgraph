@@ -43,3 +43,6 @@ jobs:
 
       - name: Run matchstick tests
         run: yarn test
+
+      - name: Generate code coverage report
+        run: yarn coverage

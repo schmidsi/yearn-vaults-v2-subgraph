@@ -6,9 +6,29 @@ All notable changes to the subgraph will be documented in this file.
 
 ### Added
 
+- New vault entity fields added
+  - availableDepositLimit
+  - depositLimit
+  - guardian
+  - governance
+  - management
+- New Strategy entity fields added
+  - apiVersion
+  - emergencyExit
+  - keeper
+  - strategist
+  - rewards
+
 ### Changed
 
+- Strategy.minDebtPerHarvest is now correctly updated
+- Strategy.maxDebtPerHarvest is now correctly updated
+- Strategy.performanceFeeBps is now correctly updated
+- Strategy.debtLimit is now correctly updated
+
 ### Fixed
+
+- Fixed an issue where the value of yvWFTM shares could not be resolved by the usdc price oracle
 
 ## [v0.0.4] - 2022-02-07
 

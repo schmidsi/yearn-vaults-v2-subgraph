@@ -78,10 +78,6 @@ export function updateVaultDayData(
       vault.id,
       dayIndex.minus(BigInt.fromI32(daysInPast))
     );
-    log.info('Searching day id {}, which is {} days in the past', [
-      dayToCheck,
-      daysInPast.toString(),
-    ]);
     let previousVaultDayData = VaultDayData.load(dayToCheck);
     if (previousVaultDayData !== null) {
       log.info(
