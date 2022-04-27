@@ -115,3 +115,6 @@ tests/.tools
 tests/.bin
 # matchstick-as
 .bin
+
+#generated
+generated/

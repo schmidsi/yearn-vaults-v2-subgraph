@@ -5,10 +5,10 @@
   "license": "MIT",
   "scripts": {
     "codegen": "graph codegen",
-    "build:mainnet": "yarn prepare:mainnet && graph build",
-    "build:fantom": "yarn prepare:fantom && graph build",
-    "build:arbitrum": "yarn prepare:arbitrum && graph build",
-    "thegraph:deploy:mainnet": "yarn build:mainnet && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ salazarguille/yearn-vaults-v2-subgraph-mainnet",
+    "build:mainnet": "yarn prepare:mainnet && yarn codegen && graph build",
+    "build:fantom": "yarn prepare:fantom && yarn codegen && graph build",
+    "build:arbitrum": "yarn prepare:arbitrum && yarn codegen && graph build",
+    "thegraph:deploy:mainnet": "yarn build:mainnet &&  graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ salazarguille/yearn-vaults-v2-subgraph-mainnet",
     "thegraph:deploy:fantom": "yarn build:fantom && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ yearn/yearn-vaults-v2-fantom",
     "thegraph:deploy:arbitrum": "yarn build:arbitrum && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ yearn/yearn-vaults-v2-arbitrum",
     "create-local:mainnet": "graph create --node http://127.0.0.1:8020/ yearn-vaults-v2/mainnet",
@@ -29,14 +29,14 @@
     "deploy:fantom": "yarn build:fantom && yarn thegraph:deploy:fantom",
     "deploy:arbitrum": "yarn build:arbitrum && yarn thegraph:deploy:arbitrum",
     "release": "standard-version",
-    "test": "yarn clean && graph test -v 0.4.0",
+    "test": "yarn clean && yarn codegen && graph test -v 0.4.0",
     "coverage": "graph test -v 0.4.0 --coverage",
     "lint:check": "prettier --check './**'",
     "lint:fix": "sort-package-json && prettier --write ./**",
     "postinstall": "husky install",
     "prepublishOnly": "pinst --disable",
     "postpublish": "pinst --enable",
-    "clean": "rm -rf ./build && rm -rf ./tests/.bin"
+    "clean": "rm -rf ./build && rm -rf ./tests/.bin && rm -rf ./generated"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.29.0",
