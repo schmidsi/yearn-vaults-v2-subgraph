@@ -1,5 +1,11 @@
 import { Address, log } from '@graphprotocol/graph-ts';
-import { Vault as VaultContract } from '../../../generated/Registry/Vault';
+import {
+  UpdateDepositLimit,
+  UpdateGovernance,
+  UpdateGuardian,
+  UpdateManagement,
+  Vault as VaultContract,
+} from '../../../generated/Registry/Vault';
 import * as vaultLibrary from '../../utils/vault/vault';
 import {
   StrategyReported as StrategyReported_v0_3_0_v0_3_1_Event,
@@ -78,6 +84,55 @@ export function handleStrategyAddedV2(event: StrategyAddedV2Event): void {
       transaction
     );
   }
+}
+
+export function handleUpdateGuardian(event: UpdateGuardian): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(event, 'UpdateGuardian');
+
+  vaultLibrary.handleUpdateGuardian(
+    event.address,
+    event.params.guardian,
+    ethTransaction
+  );
+}
+
+export function handleUpdateManagement(event: UpdateManagement): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateManagement'
+  );
+
+  vaultLibrary.handleUpdateManagement(
+    event.address,
+    event.params.management,
+    ethTransaction
+  );
+}
+
+export function handleUpdateGovernance(event: UpdateGovernance): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateGovernance'
+  );
+
+  vaultLibrary.handleUpdateGovernance(
+    event.address,
+    event.params.governance,
+    ethTransaction
+  );
+}
+
+export function handleUpdateDepositLimit(event: UpdateDepositLimit): void {
+  let ethTransaction = getOrCreateTransactionFromEvent(
+    event,
+    'UpdateDepositLimit'
+  );
+
+  vaultLibrary.handleUpdateDepositLimit(
+    event.address,
+    event.params.depositLimit,
+    ethTransaction
+  );
 }
 
 /**

@@ -209,8 +209,8 @@ dataSources:
         - event: UpdateDepositLimit(uint256)
           handler: handleUpdateDepositLimit
       {{#callHandlersEnabled}}
+      {{^disableProblematicCallHandlers}}
       callHandlers:
-        {{^disableProblematicCallHandlers}}
         - function: deposit(uint256)
           handler: handleDepositWithAmount
         - function: deposit(uint256,address)
@@ -223,7 +223,7 @@ dataSources:
           handler: handleWithdrawWithShares
         - function: withdraw(uint256,address)
           handler: handleWithdrawWithSharesAndRecipient
-        {{/disableProblematicCallHandlers}}
+      {{/disableProblematicCallHandlers}}
       {{/callHandlersEnabled}}
       file: {{{mappingFile}}}
   {{/manualVaults}}
@@ -315,8 +315,8 @@ templates:
         - event: StrategyUpdatePerformanceFee(indexed address,uint256)
           handler: handleStrategyUpdatePerformanceFee
       {{#callHandlersEnabled}}
+      {{^disableProblematicCallHandlers}}
       callHandlers:
-        {{^disableProblematicCallHandlers}}
         - function: deposit(uint256)
           handler: handleDepositWithAmount
         - function: deposit(uint256,address)
@@ -329,7 +329,7 @@ templates:
           handler: handleWithdrawWithShares
         - function: withdraw(uint256,address)
           handler: handleWithdrawWithSharesAndRecipient
-        {{/disableProblematicCallHandlers}}
+      {{/disableProblematicCallHandlers}}
       {{/callHandlersEnabled}}
   - name: Strategy
     kind: ethereum/contract
