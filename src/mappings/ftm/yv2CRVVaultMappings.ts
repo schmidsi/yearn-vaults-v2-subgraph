@@ -33,7 +33,7 @@ import {
   ZERO_ADDRESS,
   FTM_YV_2CRV_VAULT_END_BLOCK_CUSTOM,
   DON_T_CREATE_VAULT_TEMPLATE,
-  API_VERSION_0_4_2,
+  API_VERSION_0_4_3,
   FTM_MAINNET_REGISTRY_ADDRESS,
   EXPERIMENTAL,
 } from '../../utils/constants';
@@ -52,7 +52,7 @@ function createftmYv2CRVVaultIfNeeded(
     // Note: This custom mapping is used ONLY in Fantom. So, we can hardcoded the address.
     changetype<Address>(Address.fromHexString(FTM_MAINNET_REGISTRY_ADDRESS)),
     EXPERIMENTAL,
-    API_VERSION_0_4_2,
+    API_VERSION_0_4_3,
     transaction,
     DON_T_CREATE_VAULT_TEMPLATE
   );

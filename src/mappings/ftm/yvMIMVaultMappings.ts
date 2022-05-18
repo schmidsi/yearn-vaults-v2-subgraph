@@ -34,7 +34,7 @@ import {
   FTM_YV_MIM_VAULT_END_BLOCK_CUSTOM,
   DON_T_CREATE_VAULT_TEMPLATE,
   EXPERIMENTAL,
-  API_VERSION_0_4_2,
+  API_VERSION_0_4_3,
   FTM_MAINNET_REGISTRY_ADDRESS,
 } from '../../utils/constants';
 import * as strategyLibrary from '../../utils/strategy/strategy';
@@ -52,7 +52,7 @@ function createFTMYvMIMVaultIfNeeded(
     // Note: This custom mapping is used ONLY in Fantom. So, we can hardcoded the address.
     changetype<Address>(Address.fromHexString(FTM_MAINNET_REGISTRY_ADDRESS)),
     EXPERIMENTAL,
-    API_VERSION_0_4_2,
+    API_VERSION_0_4_3,
     transaction,
     DON_T_CREATE_VAULT_TEMPLATE
   );
