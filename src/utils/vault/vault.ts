@@ -26,7 +26,7 @@ import * as transferLibrary from '../transfer';
 import * as tokenLibrary from '../token';
 import * as registryLibrary from '../registry/registry';
 import { updateVaultDayData } from './vault-day-data';
-import { booleanToString } from '../commons';
+import { booleanToString, removeElementFromArray } from '../commons';
 import { getOrCreateHealthCheck } from '../healthCheck';
 
 const buildId = (vaultAddress: Address): string => {
@@ -83,6 +83,9 @@ const createNewVaultFromAddress = (
   // vault fields
   vaultEntity.activation = vaultContract.activation();
   vaultEntity.apiVersion = vaultContract.apiVersion();
+
+  //Empty at creation
+  vaultEntity.withdrawalQueue = [];
 
   return vaultEntity;
 };
@@ -551,6 +554,19 @@ export function strategyAddedToQueue(
   if (strategy !== null) {
     strategy.inQueue = true;
     strategy.save();
+
+    let vault = Vault.load(event.address.toHexString());
+    if (vault != null) {
+      //Add the new strategy to the withdrawl queue
+      let withdrawlQueue = vault.withdrawalQueue;
+      //Only add strategy to queue when its not was previously added
+      if (!withdrawlQueue.includes(strategy.address.toHexString())) {
+        withdrawlQueue.push(strategy.address.toHexString());
+      }
+      vault.withdrawalQueue = withdrawlQueue;
+
+      vault.save();
+    }
   }
 }
 
@@ -566,6 +582,57 @@ export function strategyRemovedFromQueue(
   if (strategy !== null) {
     strategy.inQueue = false;
     strategy.save();
+
+    let vault = Vault.load(event.address.toHexString());
+    if (vault != null) {
+      vault.withdrawalQueue = removeElementFromArray(
+        vault.withdrawalQueue,
+        strategy.address.toHexString()
+      );
+
+      vault.save();
+    }
+  }
+}
+
+export function UpdateWithdrawalQueue(
+  newQueue: Address[],
+  ethTransaction: Transaction,
+  event: ethereum.Event
+): void {
+  let vault = Vault.load(event.address.toHexString());
+  if (vault != null) {
+    const oldWithdrawlQueue = vault.withdrawalQueue;
+    //Before we can set the new queue we need to remove all previous strats
+    for (let i = 0; i < oldWithdrawlQueue.length; i++) {
+      let currentStrategyAddress = oldWithdrawlQueue[i];
+      let currentStrategy = Strategy.load(currentStrategyAddress);
+
+      //Setting the inQueue field on the strat to false
+      if (currentStrategy !== null) {
+        currentStrategy.inQueue = false;
+        currentStrategy.save();
+      }
+    }
+    //Initialize a new empty queue
+    let vaultsNewWithdrawlQueue = new Array<string>();
+
+    //Now we can add the new strats to the queue
+    for (let i = 0; i < newQueue.length; i++) {
+      let currentStrategyAddress = newQueue[i].toHexString();
+      let currentStrategy = Strategy.load(currentStrategyAddress);
+
+      //Setting the inQueue field on the strat to true
+      if (currentStrategy !== null) {
+        currentStrategy.inQueue = true;
+        currentStrategy.save();
+      }
+
+      //Add the strates addr to the vaults withdrawlQueue
+      vaultsNewWithdrawlQueue.push(currentStrategyAddress);
+    }
+    vault.withdrawalQueue = vaultsNewWithdrawlQueue;
+    vault.save();
   }
 }
 

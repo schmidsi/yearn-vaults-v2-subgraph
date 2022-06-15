@@ -72,6 +72,7 @@ export let ETH_MAINNET_REGISTRY_ADDRESS_V2 =
 export const ENDORSED = 'Endorsed';
 export const EXPERIMENTAL = 'Experimental';
 export const API_VERSION_0_4_3 = '0.4.3';
+export const API_VERSION_0_4_2 = '0.4.2';
 export const API_VERSION_0_3_5 = '0.3.5';
 export const ETH_MAINNET_NETWORK = 'mainnet';
 export const FTM_MAINNET_NETWORK = 'fantom';

@@ -116,3 +116,17 @@ export function isEventBlockNumberLt(
 export function booleanToString(value: boolean): string {
   return value ? 'true' : 'false';
 }
+
+//Normaly i would use Array.filter for this but since AS does not supports closures i implemented this function
+//Returns the pointer to an new array without the specified element
+export function removeElementFromArray<T>(arr: Array<T>, e: T): Array<T> {
+  let newArr = new Array<T>();
+  for (let i = 0; i < arr.length; i++) {
+    let current = arr[i];
+    if (current == e) {
+      continue;
+    }
+    newArr.push(current);
+  }
+  return newArr;
+}

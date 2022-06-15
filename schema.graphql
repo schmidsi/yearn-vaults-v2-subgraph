@@ -141,6 +141,8 @@ type Vault @entity {
   deposits: [Deposit!]! @derivedFrom(field: "vault")
   "Token withdrawals from the Vault"
   withdrawals: [Withdrawal!]! @derivedFrom(field: "vault")
+  "withdrawl queue of strategies"
+  withdrawalQueue:[Strategy!]! 
   "Transfers of Vault Shares"
   transfers: [Transfer!]! @derivedFrom(field: "vault")
   "Tags attached to the Vault"

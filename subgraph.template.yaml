@@ -188,6 +188,8 @@ dataSources:
           handler: handleStrategyAddedToQueue
         - event: StrategyRemovedFromQueue(indexed address)
           handler: handleStrategyRemovedFromQueue
+        - event : UpdateWithdrawalQueue(address[20])
+          handler : handleUpdateWithdrawalQueue
         - event: UpdateRewards(address)
           handler: handleUpdateRewards
         - event: Deposit(indexed address,uint256,uint256)
@@ -286,6 +288,8 @@ templates:
           handler: handleStrategyAddedToQueue
         - event: StrategyRemovedFromQueue(indexed address)
           handler: handleStrategyRemovedFromQueue
+        - event : UpdateWithdrawalQueue(address[20])
+          handler : handleUpdateWithdrawalQueue
         - event: UpdateRewards(address)
           handler: handleUpdateRewards
         - event: Deposit(indexed address,uint256,uint256)

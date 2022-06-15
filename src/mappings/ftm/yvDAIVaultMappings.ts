@@ -25,6 +25,7 @@ import {
   StrategyAddedToQueue as StrategyAddedToQueueEvent,
   StrategyRemovedFromQueue as StrategyRemovedFromQueueEvent,
   UpdateRewards as UpdateRewardsEvent,
+  UpdateWithdrawalQueue,
 } from '../../../generated/ftmYvDAIVault/Vault';
 import { Strategy, Transaction, Vault } from '../../../generated/schema';
 import { isEventBlockNumberLt, printCallInfo } from '../../utils/commons';
@@ -280,12 +281,17 @@ export function handleStrategyMigrated(event: StrategyMigrated): void {
           null,
           ethTransaction
         );
-        vaultLibrary.strategyRemovedFromQueue(
-          oldStrategyAddress,
-          ethTransaction,
-          event
-        );
       }
+      //We can now remove the old strat from the queue
+      log.info('[Strategy Migrated] Removing old strategy', [
+        oldStrategyAddress.toHexString(),
+      ]);
+
+      vaultLibrary.strategyRemovedFromQueue(
+        oldStrategyAddress,
+        ethTransaction,
+        event
+      );
     }
   }
 }
@@ -801,6 +807,28 @@ export function handleStrategyRemovedFromQueue(
     );
     vaultLibrary.strategyRemovedFromQueue(
       event.params.strategy,
+      ethTransaction,
+      event
+    );
+  }
+}
+export function handleUpdateWithdrawalQueue(
+  event: UpdateWithdrawalQueue
+): void {
+  if (
+    isEventBlockNumberLt(
+      'ftmYvDAIVault_UpdateWithdrawalQueue',
+      event.block,
+      FTM_YV_DAI_VAULT_END_BLOCK_CUSTOM
+    )
+  ) {
+    let ethTransaction = getOrCreateTransactionFromEvent(
+      event,
+      'ftmYvDAIVault_UpdateWithdrawalQueue'
+    );
+
+    vaultLibrary.UpdateWithdrawalQueue(
+      event.params.queue,
       ethTransaction,
       event
     );

@@ -1,5 +1,7 @@
 import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import {
+  handleStrategyAddedToQueue,
+  handleStrategyRemovedFromQueue,
   handleUpdateDepositLimit,
   handleUpdateGovernance,
   handleUpdateGuardian,
@@ -7,10 +9,14 @@ import {
   handleUpdateManagementFee,
   handleUpdatePerformanceFee,
   handleUpdateRewards,
+  handleUpdateWithdrawalQueue,
 } from '../../src/mappings/vaultMappings';
 import { MockBlock } from '../mappingParamBuilders/mockBlock';
 import { VaultStub } from '../stubs/vaultStateStub';
 import {
+  StrategyAddedToQueue,
+  StrategyRemovedFromQueue,
+  UpdateWithdrawalQueue,
   UpdateDepositLimit,
   UpdateGovernance,
   UpdateGuardian,
@@ -20,6 +26,8 @@ import {
   UpdateRewards,
 } from '../../generated/Registry/Vault';
 import { GenericAttributeUpdateEvent } from '../mappingParamBuilders/genericUpdateParam';
+import { removeElementFromArray } from '../../src/utils/commons';
+import { UpdateWithdrawalQueueParamBuilder } from '../mappingParamBuilders/updateWithdrawlQueueParamBuilder';
 
 export class MockUpdateManagementFeeTransition {
   mockEvent: GenericAttributeUpdateEvent<UpdateManagementFee, BigInt>;
@@ -185,6 +193,81 @@ export class MockUpdateDepositLimitTransition {
     >(preTransitionStub.shareToken.address, depositLimit, null, null);
 
     handleUpdateDepositLimit(this.mockEvent.mock);
+
+    MockBlock.IncrementBlock();
+  }
+}
+
+export class MockStrategyAddedToQueueTransition {
+  mockEvent: GenericAttributeUpdateEvent<StrategyAddedToQueue, Address>;
+  preTransitionStub: VaultStub;
+  postTransitionStub: VaultStub;
+
+  constructor(preTransitionStub: VaultStub, strategyAdded: string) {
+    this.preTransitionStub = preTransitionStub;
+    let postTransitionStub = preTransitionStub.clone();
+
+    let withDrawlQueue = postTransitionStub.withDrawlQueue;
+    withDrawlQueue.push(strategyAdded);
+
+    postTransitionStub.withDrawlQueue = withDrawlQueue;
+    this.postTransitionStub = postTransitionStub;
+
+    this.mockEvent = new GenericAttributeUpdateEvent<
+      StrategyAddedToQueue,
+      Address
+    >(preTransitionStub.shareToken.address, strategyAdded, null, null);
+
+    handleStrategyAddedToQueue(this.mockEvent.mock);
+
+    MockBlock.IncrementBlock();
+  }
+}
+export class MockUpdateWithdrawalQueueTransition {
+  mockEvent: UpdateWithdrawalQueueParamBuilder<UpdateWithdrawalQueue>;
+  preTransitionStub: VaultStub;
+  postTransitionStub: VaultStub;
+
+  constructor(preTransitionStub: VaultStub, newWithdrawlQueue: string[]) {
+    this.preTransitionStub = preTransitionStub;
+    let postTransitionStub = preTransitionStub.clone();
+
+    postTransitionStub.withDrawlQueue = newWithdrawlQueue;
+    this.postTransitionStub = postTransitionStub;
+
+    this.mockEvent = new UpdateWithdrawalQueueParamBuilder<UpdateWithdrawalQueue>(
+      preTransitionStub.shareToken.address,
+      newWithdrawlQueue,
+      null,
+      null
+    );
+
+    handleUpdateWithdrawalQueue(this.mockEvent.mock);
+
+    MockBlock.IncrementBlock();
+  }
+}
+export class MockStrategyRemovedFromQueueTransition {
+  mockEvent: GenericAttributeUpdateEvent<StrategyRemovedFromQueue, Address>;
+  preTransitionStub: VaultStub;
+  postTransitionStub: VaultStub;
+
+  constructor(preTransitionStub: VaultStub, strategyRemoved: string) {
+    this.preTransitionStub = preTransitionStub;
+    let postTransitionStub = preTransitionStub.clone();
+
+    postTransitionStub.withDrawlQueue = removeElementFromArray(
+      postTransitionStub.withDrawlQueue,
+      strategyRemoved
+    );
+    this.postTransitionStub = postTransitionStub;
+
+    this.mockEvent = new GenericAttributeUpdateEvent<
+      StrategyRemovedFromQueue,
+      Address
+    >(preTransitionStub.shareToken.address, strategyRemoved, null, null);
+
+    handleStrategyRemovedFromQueue(this.mockEvent.mock);
 
     MockBlock.IncrementBlock();
   }

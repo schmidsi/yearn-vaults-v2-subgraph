@@ -1,12 +1,8 @@
-import { Address, ethereum, BigInt } from '@graphprotocol/graph-ts';
+import { Address, BigInt, ethereum } from '@graphprotocol/graph-ts';
 import { createMockedFunction } from 'matchstick-as';
-import { Vault } from '../../generated/Registry/Vault';
-import { Token } from '../../generated/schema';
 import { defaults } from '../default';
-import { fatalTestError } from '../util';
 import { GenericStateStub } from './genericStateStub';
 import { TokenStub } from './tokenStateStub';
-import { log } from 'matchstick-as/assembly/log';
 
 export class VaultStub extends GenericStateStub {
   static DefaultAddress: string = defaults.vaultAddress;
@@ -28,7 +24,8 @@ export class VaultStub extends GenericStateStub {
       null, // depositLimit
       null, // availableDepositLimit
       TokenStub.DefaultToken(VaultStub.DefaultAddress),
-      TokenStub.DefaultToken(TokenStub.DefaultTokenAddress)
+      TokenStub.DefaultToken(TokenStub.DefaultTokenAddress),
+      null //withdrawlQueue
     );
   }
 
@@ -158,6 +155,25 @@ export class VaultStub extends GenericStateStub {
     this._availableDepositLimit = value;
   }
 
+  private _withDrawlQueue: Array<string>;
+  public get withDrawlQueue(): Array<string> {
+    return this._withDrawlQueue;
+  }
+
+  public set withDrawlQueue(value: Array<string>) {
+    createMockedFunction(
+      Address.fromString(this.address),
+      'withdrawalQueue',
+      'withdrawalQueue'.concat('(uint256):(address)')
+    ).returns([
+      //@ts-ignore
+      ethereum.Value.fromAddressArray(
+        value.map<Address>((v: string) => Address.fromString(v))
+      ),
+    ]);
+    this._withDrawlQueue = value;
+  }
+
   shareToken: TokenStub;
   wantToken: TokenStub;
 
@@ -178,7 +194,8 @@ export class VaultStub extends GenericStateStub {
       this.depositLimit,
       this.availableDepositLimit,
       this.shareToken,
-      this.wantToken
+      this.wantToken,
+      this.withDrawlQueue
     );
   }
 
@@ -198,7 +215,8 @@ export class VaultStub extends GenericStateStub {
     depositLimit: string | null,
     availableDepositLimit: string | null,
     shareToken: TokenStub,
-    wantToken: TokenStub
+    wantToken: TokenStub,
+    withDrawlQueue: Array<string> | null
   ) {
     super(shareToken.address);
     this.shareToken = shareToken;
@@ -274,6 +292,11 @@ export class VaultStub extends GenericStateStub {
       this._availableDepositLimit = availableDepositLimit;
     } else {
       this._availableDepositLimit = '100';
+    }
+    if (withDrawlQueue) {
+      this._withDrawlQueue = withDrawlQueue;
+    } else {
+      this._withDrawlQueue = new Array();
     }
 
     // update stubs by triggering each field's setter
