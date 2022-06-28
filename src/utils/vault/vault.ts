@@ -668,22 +668,33 @@ export function handleUpdateRewards(
 }
 
 function getBalancePosition(vaultContract: VaultContract): BigInt {
-  let totalAssets = vaultContract.totalAssets();
+  let tryTotalAssets = vaultContract.try_totalAssets();
+  // TODO Debugging Use totalAssets directly
+  let totalAssets = tryTotalAssets.reverted
+    ? BigInt.fromI32(0)
+    : tryTotalAssets.value;
+
+  if (tryTotalAssets.reverted) {
+    log.warning(
+      'try_totalAssets (getBalancePosition) FAILED Vault {} - TotalAssets',
+      [vaultContract._address.toHexString(), totalAssets.toString()]
+    );
+  }
   let tryPricePerShare = vaultContract.try_pricePerShare();
   let pricePerShare = tryPricePerShare.reverted
     ? BigInt.fromI32(0)
     : tryPricePerShare.value;
   // TODO Debugging Use pricePerShare directly
   if (tryPricePerShare.reverted) {
-    log.warning('try_pricePerShare FAILED Vault {} - PricePerShare', [
-      vaultContract._address.toHexString(),
-      pricePerShare.toString(),
-    ]);
+    log.warning(
+      'try_pricePerShare (getBalancePosition) FAILED Vault {} - PricePerShare',
+      [vaultContract._address.toHexString(), pricePerShare.toString()]
+    );
   } else {
-    log.warning('try_pricePerShare SUCCESS Vault {} - PricePerShare', [
-      vaultContract._address.toHexString(),
-      pricePerShare.toString(),
-    ]);
+    log.warning(
+      'try_pricePerShare (getBalancePosition) SUCCESS Vault {} - PricePerShare',
+      [vaultContract._address.toHexString(), pricePerShare.toString()]
+    );
   }
   // @ts-ignore
   let decimals = u8(vaultContract.decimals().toI32());
