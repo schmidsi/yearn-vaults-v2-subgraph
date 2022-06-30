@@ -558,7 +558,7 @@ export function strategyAddedToQueue(
     let vault = Vault.load(event.address.toHexString());
     if (vault != null) {
       //Add the new strategy to the withdrawl queue
-      let withdrawlQueue = vault.withdrawalQueue;
+      let withdrawlQueue = (vault.withdrawalQueue || []) as string[];
       //Only add strategy to queue when its not was previously added
       if (!withdrawlQueue.includes(strategy.address.toHexString())) {
         withdrawlQueue.push(strategy.address.toHexString());
@@ -586,7 +586,7 @@ export function strategyRemovedFromQueue(
     let vault = Vault.load(event.address.toHexString());
     if (vault != null) {
       vault.withdrawalQueue = removeElementFromArray(
-        vault.withdrawalQueue,
+        (vault.withdrawalQueue || []) as string[],
         strategy.address.toHexString()
       );
 
@@ -602,7 +602,7 @@ export function UpdateWithdrawalQueue(
 ): void {
   let vault = Vault.load(event.address.toHexString());
   if (vault != null) {
-    const oldWithdrawlQueue = vault.withdrawalQueue;
+    const oldWithdrawlQueue = (vault.withdrawalQueue || []) as string[];
     //Before we can set the new queue we need to remove all previous strats
     for (let i = 0; i < oldWithdrawlQueue.length; i++) {
       let currentStrategyAddress = oldWithdrawlQueue[i];

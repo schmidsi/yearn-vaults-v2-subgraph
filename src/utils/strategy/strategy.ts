@@ -92,7 +92,9 @@ export function createAndGet(
     let vaultInstance = Vault.load(vault.toHexString());
     if (vaultInstance != null) {
       //Add the new strategy to the withdrawl queue of the vault
-      let withdrawlQueue = vaultInstance.withdrawalQueue;
+      let withdrawlQueue = vaultInstance.withdrawalQueue
+        ? (vaultInstance.withdrawalQueue as string[])
+        : [];
       withdrawlQueue.push(strategy.address.toHexString());
       vaultInstance.withdrawalQueue = withdrawlQueue;
       vaultInstance.save();

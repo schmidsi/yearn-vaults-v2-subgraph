@@ -48,9 +48,9 @@
     }
   ],
 
-  "graftEnabled": false,
-  "graftBase": "subgraph_deployment_id",
-  "graftBlock": "0",
+  "graftEnabled": true,
+  "graftBase": "QmcJJEoQH7ZiSiwg2YaUw39tweVArEY1m928hH1YL35ANo",
+  "graftBlock": "15034790",
 
   "disableProblematicCallHandlers": false
 }
